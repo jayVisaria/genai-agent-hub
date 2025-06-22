@@ -31,14 +31,6 @@ graph LR
     B --> E[Sentiment Agent]
     B --> F[Qualitative Agent]
     B --> G[Risk Assessment Agent]
-    
-    classDef coordinator fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef orchestrator fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef agent fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
-    
-    class A coordinator
-    class B orchestrator
-    class C,D,E,F,G agent
 ```
 
 ## Tools and APIs Used
