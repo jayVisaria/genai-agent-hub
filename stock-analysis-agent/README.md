@@ -107,7 +107,7 @@ gcloud services enable aiplatform.googleapis.com
 
 Run the agent:
 ```bash
-poetry run python -m stock_analysis.agent
+poetry run adk web
 ```
 
 ## Legal Disclaimer
