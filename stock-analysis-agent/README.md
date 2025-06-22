@@ -4,6 +4,12 @@
 
 The Stock Analysis Agent is a comprehensive AI-powered financial analysis system that provides in-depth stock market analysis through specialized sub-agents. Each sub-agent focuses on a specific aspect of stock analysis to deliver thorough and well-rounded investment insights.
 
+## Demo
+
+<p align="center">
+  <img src="https://github.com/jayVisaria/genai-agent-hub/releases/download/1.0.0/Stock_Analysis_Agent_demo.gif" alt="Stock Analysis Agent Demo" width="auto">
+</p>
+
 ## Agent Details
 
 | Attribute | Detail |
