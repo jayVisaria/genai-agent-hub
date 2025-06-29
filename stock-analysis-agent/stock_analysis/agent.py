@@ -5,6 +5,7 @@ from google.adk.tools.agent_tool import AgentTool
 
 from . import prompt
 from .sub_agents.analysis_agent import analysis_orchestrator
+from .sub_agents.prediction_agent import stock_prediction_agent
 
 MODEL = "gemini-2.5-pro-preview-05-06"
 
@@ -19,6 +20,7 @@ stock_analysis_coordinator = Agent(
     instruction=prompt.STOCK_ANALYSIS_COORDINATOR_PROMPT,
     tools=[
         AgentTool(agent=analysis_orchestrator),
+        AgentTool(agent=stock_prediction_agent),
     ],
 )
 

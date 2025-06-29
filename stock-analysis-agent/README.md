@@ -24,13 +24,15 @@ The Stock Analysis Agent is a comprehensive AI-powered financial analysis system
 
 The Stock Analysis Agent uses a hierarchical multi-agent architecture:
 
-- **Stock Analysis Coordinator**: The root agent that orchestrates the entire analysis process by delegating tasks to the Analysis Orchestrator.
+- **Stock Analysis Coordinator**: The root agent that orchestrates the entire analysis process by delegating tasks to the Analysis Orchestrator and Prediction Agent.
+- **Prediction Agent**: Institutional-grade stock prediction specialist that provides forecasts using comprehensive real-time research across macro trends, institutional flows, sector rotation, technical setups, and fundamentals.
 - **Analysis Orchestrator**: Coordinates all specialized sub-agents and synthesizes their outputs into a comprehensive investment report.
 - **Sub-Agents**: Each sub-agent is responsible for a specific domain of analysis (technical, fundamental, sentiment, qualitative, risk).
 
 ```mermaid
-graph LR
-    A[Stock Analysis Coordinator] --> B[Analysis Orchestrator]
+graph TD
+    A[Stock Analysis Coordinator] ---> B[Analysis Orchestrator]
+    A --> H[Prediction Agent]
     
     B --> C[Fundamental Agent]
     B --> D[Technical Agent]
@@ -50,6 +52,7 @@ Each sub-agent leverages specific tools to perform its analysis:
 | Sentiment Agent          | Google Search     | Collects news, analyst opinions, and social sentiment. |
 | Qualitative Agent        | Google Search     | Finds information on management, business model, and competitive landscape. |
 | Risk Assessment Agent    | Google Search     | Identifies and quantifies risk factors from market and company data. |
+| Prediction Agent | Google Search | Conducts comprehensive real-time research on macro trends, institutional flows, sector rotation, technical setups, and fundamentals to predict stock performance. |
 | Analysis Orchestrator    | AgentTool         | Synthesizes outputs from all sub-agents. |
 | Stock Analysis Coordinator | AgentTool       | Orchestrates the overall workflow. |
 
@@ -57,10 +60,12 @@ All sub-agents use the `gemini-2.5-pro-preview-05-06` model for LLM-based reason
 
 ## Key Features
 
+- **Prediction Engine**: Institutional-grade stock prediction with real-time research across global markets (US, European, Asian, Indian, emerging markets)
 - Modular, multi-agent design for comprehensive stock analysis
 - Each sub-agent specializes in a distinct analysis domain
 - Uses Google Search for real-time data gathering
-- Produces institutional-grade investment reports
+- Cross-market intelligence and institutional flow analysis
+- Produces institutional-grade investment reports with transparent multi-pillar analysis
 
 ## Setup and Installation
 

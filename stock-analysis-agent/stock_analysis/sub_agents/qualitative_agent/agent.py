@@ -6,7 +6,7 @@ from google.adk.tools import google_search
 
 from . import prompt
 
-MODEL = "gemini-2.0-flash-001"
+MODEL = "gemini-2.5-pro-preview-05-06"
 
 # Format current date for dynamic insertion
 current_date = datetime.now().strftime("%B %d, %Y")

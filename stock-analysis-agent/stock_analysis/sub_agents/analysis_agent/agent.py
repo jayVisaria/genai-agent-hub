@@ -10,6 +10,7 @@ from ..technical_agent import technical_analysis_agent
 from ..sentiment_agent import sentiment_analysis_agent
 from ..qualitative_agent import qualitative_analysis_agent
 from ..risk_assessment_agent import risk_assessment_agent
+from ..prediction_agent import stock_prediction_agent
 
 MODEL = "gemini-2.5-pro-preview-05-06"
 
@@ -31,5 +32,6 @@ analysis_orchestrator = Agent(
         AgentTool(agent=sentiment_analysis_agent),
         AgentTool(agent=qualitative_analysis_agent),
         AgentTool(agent=risk_assessment_agent),
+        AgentTool(agent=stock_prediction_agent),
     ],
 )
