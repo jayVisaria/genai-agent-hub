@@ -22,3 +22,5 @@ feedback_assessment_agent = Agent(
     model=MODEL,
     description="Evaluates user responses to quizzes and exercises.",
     instruction=prompt.FEEDBACK_ASSESSMENT_PROMPT,
+    tools=[score_answer],
+)
