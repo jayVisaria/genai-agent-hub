@@ -106,3 +106,29 @@ gcloud services enable aiplatform.googleapis.com
 Run the agent:
 ```bash
 poetry run adk web
+```
+
+## Sample Workflow
+
+This example demonstrates how a user request to "Teach me about photosynthesis" is processed through the multi-agent system.
+
+1. **User Request**: The user asks the Study and Learn Agent to explain photosynthesis.
+
+2. **Study Coordinator**: The coordinator receives the request and delegates the task to the appropriate sub-agent.
+   - **Action**: Calls the `Content Retrieval Agent`.
+
+3. **Content Retrieval Agent**: This agent searches for information on photosynthesis.
+   - **Action**: Uses the Wikipedia Search tool to find a relevant article.
+   - **Output**: Returns the raw text of the article to the coordinator.
+
+4. **Personalization Agent**: The coordinator passes the content to this agent to tailor it to the user.
+   - **Action**: Accesses the user's profile and learning history from memory to adapt the content.
+   - **Output**: Returns a simplified and structured version of the article.
+
+5. **Interaction Agent**: The coordinator sends the tailored content to this agent for user engagement.
+   - **Action**: Presents the information in a conversational format and asks the user if they want to take a short quiz.
+
+6. **Feedback and Assessment Agent**: If the user agrees to the quiz, this agent evaluates their answers.
+   - **Action**: Scores the user's responses and generates personalized feedback.
+
+7. **Progress Tracking Agent**: The coordinator sends the performance data to this agent to log the user's progress.
