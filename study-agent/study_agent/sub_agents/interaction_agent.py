@@ -18,3 +18,5 @@ interaction_agent = Agent(
     model=MODEL,
     description="Manages the direct conversational engagement with the user.",
     instruction=prompt.INTERACTION_PROMPT,
+    tools=[conversation_chain],
+)
