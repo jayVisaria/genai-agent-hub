@@ -20,3 +20,6 @@ progress_tracking_agent = Agent(
     name="progress_tracking_agent",
     model=MODEL,
     description="Monitors and logs the user's learning journey.",
+    instruction=prompt.PROGRESS_TRACKING_PROMPT,
+    tools=[record_progress],
+)
