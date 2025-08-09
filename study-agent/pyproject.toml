@@ -1,0 +1,19 @@
+[project]
+name = "study-and-learn-agent"
+version = "0.1.0"
+description = "A multi-agent system for personalized, interactive learning"
+authors = [
+    {name = "JayVisaria9",email = "jay.visaria@pfizer.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "google-adk (>=1.4.2,<2.0.0)",
+    "google-cloud-aiplatform (>=1.98.0,<2.0.0)",
+    "google-genai (>=1.21.1,<2.0.0)"
+]
+
+[tool.poetry]
+package-mode = false
+
+[build-system]
