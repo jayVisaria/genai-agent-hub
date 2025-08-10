@@ -1,7 +1,7 @@
 """Content Retrieval Agent: Fetches educational content from various sources."""
 
 from google.adk.agents import Agent
-from langchain_community.tools import WikipediaSearch
+from google.adk.tools import google_search
 
 from .. import prompt
 
@@ -12,6 +12,6 @@ content_retrieval_agent = Agent(
     model=MODEL,
     description="Fetches educational content from various sources.",
     instruction=prompt.CONTENT_RETRIEVAL_PROMPT,
-    tools=[WikipediaSearch()],
+    tools=[google_search],
 )
 
