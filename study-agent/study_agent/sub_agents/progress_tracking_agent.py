@@ -1,11 +1,11 @@
 """Progress Tracking Agent: Monitors and logs the user's learning journey."""
 
 from google.adk.agents import Agent
-from google.adk.tools import Tool
+from google.adk.tools import FunctionTool
 
 from .. import prompt
 
-MODEL = "gemini-2.5-pro-preview-05-06"
+MODEL = "gemini-2.5-pro"
 
 
 def record_progress(user_id: str, topic: str, performance_data: dict) -> str:
@@ -14,9 +14,7 @@ def record_progress(user_id: str, topic: str, performance_data: dict) -> str:
     print(f"Recording progress for user {user_id} on topic {topic}: {performance_data}")
     return "Progress recorded successfully."
 
-record_progress_tool = Tool(
-    name="record_progress",
-    description="Records the user's progress in a structured format.",
+record_progress_tool = FunctionTool(
     func=record_progress,
 )
 

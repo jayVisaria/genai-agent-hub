@@ -10,7 +10,7 @@ from .sub_agents.interaction_agent import interaction_agent
 from .sub_agents.personalization_agent import personalization_agent
 from .sub_agents.progress_tracking_agent import progress_tracking_agent
 
-MODEL = "gemini-2.5-pro-preview-05-06"
+MODEL = "gemini-2.5-pro"
 
 study_coordinator = Agent(
     name="study_coordinator",

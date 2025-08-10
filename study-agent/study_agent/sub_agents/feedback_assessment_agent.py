@@ -1,11 +1,11 @@
 """Feedback and Assessment Agent: Evaluates user responses and provides feedback."""
 
 from google.adk.agents import Agent
-from google.adk.tools import Tool
+from google.adk.tools import FunctionTool
 
 from .. import prompt
 
-MODEL = "gemini-2.5-pro-preview-05-06"
+MODEL = "gemini-2.5-pro"
 
 
 def score_answer(answer: str, correct_answer: str) -> dict:
@@ -15,9 +15,7 @@ def score_answer(answer: str, correct_answer: str) -> dict:
     feedback = "Correct!" if score == 1 else "Incorrect. Please try again."
     return {"score": score, "feedback": feedback}
 
-score_answer_tool = Tool(
-    name="score_answer",
-    description="Scores the user's answer and provides feedback.",
+score_answer_tool = FunctionTool(
     func=score_answer,
 )
 

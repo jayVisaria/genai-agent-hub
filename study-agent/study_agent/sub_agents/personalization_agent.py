@@ -4,7 +4,7 @@ from google.adk.agents import Agent
 
 from .. import prompt
 
-MODEL = "gemini-2.5-pro-preview-05-06"
+MODEL = "gemini-2.5-pro"
 
 personalization_agent = Agent(
     name="personalization_agent",
