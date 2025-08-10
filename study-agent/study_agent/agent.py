@@ -7,6 +7,7 @@ from . import prompt
 from .sub_agents.content_retrieval_agent import content_retrieval_agent
 from .sub_agents.feedback_assessment_agent import feedback_assessment_agent
 from .sub_agents.interaction_agent import interaction_agent
+from .sub_agents.learning_plan_agent import learning_plan_agent
 from .sub_agents.personalization_agent import personalization_agent
 from .sub_agents.progress_tracking_agent import progress_tracking_agent
 
@@ -21,6 +22,7 @@ study_coordinator = Agent(
     ),
     instruction=prompt.STUDY_COORDINATOR_PROMPT,
     tools=[
+        AgentTool(agent=learning_plan_agent),
         AgentTool(agent=content_retrieval_agent),
         AgentTool(agent=personalization_agent),
         AgentTool(agent=interaction_agent),
