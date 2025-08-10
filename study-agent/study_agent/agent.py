@@ -1,34 +1,43 @@
 """Study and Learn Coordinator: Main agent orchestrating personalized learning experiences"""
 
 from google.adk.agents import Agent
-from google.adk.tools.agent_tool import AgentTool
+from google.adk.tools import FunctionTool, google_search
 
 from . import prompt
-from .sub_agents.content_retrieval_agent import content_retrieval_agent
-from .sub_agents.feedback_assessment_agent import feedback_assessment_agent
-from .sub_agents.interaction_agent import interaction_agent
-from .sub_agents.learning_plan_agent import learning_plan_agent
-from .sub_agents.personalization_agent import personalization_agent
-from .sub_agents.progress_tracking_agent import progress_tracking_agent
 
 MODEL = "gemini-2.5-pro"
+
+
+def score_answer(answer: str, correct_answer: str) -> dict:
+    """Scores the user's answer and provides feedback."""
+    # This is a placeholder for a more sophisticated scoring logic
+    score = 1 if answer.lower() == correct_answer.lower() else 0
+    feedback = "Correct!" if score == 1 else "Incorrect. Please try again."
+    return {"score": score, "feedback": feedback}
+
+
+def record_progress(user_id: str, topic: str, performance_data: dict) -> str:
+    """Records the user's progress in a structured format."""
+    # This is a placeholder for a more sophisticated progress logging mechanism
+    print(f"Recording progress for user {user_id} on topic {topic}: {performance_data}")
+    return "Progress recorded successfully."
+
 
 study_coordinator = Agent(
     name="study_coordinator",
     model=MODEL,
     description=(
         "A specialized study coordinator that orchestrates a personalized and "
-        "interactive learning experience through specialized agents."
+        "interactive learning experience."
     ),
     instruction=prompt.STUDY_COORDINATOR_PROMPT,
+    memory=True,
     tools=[
-        AgentTool(agent=learning_plan_agent),
-        AgentTool(agent=content_retrieval_agent),
-        AgentTool(agent=personalization_agent),
-        AgentTool(agent=interaction_agent),
-        AgentTool(agent=feedback_assessment_agent),
-        AgentTool(agent=progress_tracking_agent),
+        google_search,
+        FunctionTool(func=score_answer),
+        FunctionTool(func=record_progress),
     ],
 )
 
 root_agent = study_coordinator
+
