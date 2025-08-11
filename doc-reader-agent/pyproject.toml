@@ -11,3 +11,6 @@ langgraph = ">=0.1.0"
 langchain-google-genai = ">=1.0.0"
 beautifulsoup4 = ">=4.12.3"
 requests = ">=2.31.0"
+
+[project.optional-dependencies]
+dev = ["ruff >= 0.1.0"]
