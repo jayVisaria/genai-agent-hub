@@ -14,3 +14,7 @@ requests = ">=2.31.0"
 
 [project.optional-dependencies]
 dev = ["ruff >= 0.1.0"]
+
+[tool.poetry.scripts]
+lint = "ruff check ."
+format = "ruff format ."
