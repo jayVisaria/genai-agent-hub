@@ -1,34 +1,20 @@
 """Study and Learn Coordinator: Main agent orchestrating personalized learning experiences"""
 
 from google.adk.agents import Agent
-from google.adk.tools.agent_tool import AgentTool
+from google.adk.tools import google_search
 
 from . import prompt
-from .sub_agents.content_retrieval_agent import content_retrieval_agent
-from .sub_agents.feedback_assessment_agent import feedback_assessment_agent
-from .sub_agents.interaction_agent import interaction_agent
-from .sub_agents.learning_plan_agent import learning_plan_agent
-from .sub_agents.personalization_agent import personalization_agent
-from .sub_agents.progress_tracking_agent import progress_tracking_agent
 
 MODEL = "gemini-2.5-pro"
+
 
 study_coordinator = Agent(
     name="study_coordinator",
     model=MODEL,
-    description=(
-        "A specialized study coordinator that orchestrates a personalized and "
-        "interactive learning experience through specialized agents."
-    ),
+    description=("A specialized study coordinator that facilitates personalized and interactive learning experiences."),
     instruction=prompt.STUDY_COORDINATOR_PROMPT,
-    tools=[
-        AgentTool(agent=learning_plan_agent),
-        AgentTool(agent=content_retrieval_agent),
-        AgentTool(agent=personalization_agent),
-        AgentTool(agent=interaction_agent),
-        AgentTool(agent=feedback_assessment_agent),
-        AgentTool(agent=progress_tracking_agent),
-    ],
+    tools=[google_search],
 )
 
 root_agent = study_coordinator
+
