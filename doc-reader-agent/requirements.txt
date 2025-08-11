@@ -1,0 +1,4 @@
+deepagents
+langgraph-cli[inmem]
+beautifulsoup4
+requests
