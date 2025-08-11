@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Study and Learn Agent is a comprehensive AI-powered educational system that provides personalized and interactive learning experiences through specialized sub-agents. Each sub-agent focuses on a specific aspect of the learning process to deliver a thorough and engaging educational journey.
+The Study and Learn Agent is a comprehensive AI-powered educational system that provides personalized and interactive learning experiences. The agent acts as an expert study coordinator and interactive learning companion, integrating all essential learning capabilities into a streamlined single-agent architecture.
 
 ## Agent Details
 
@@ -10,49 +10,49 @@ The Study and Learn Agent is a comprehensive AI-powered educational system that 
 |---|---|
 | Interaction Type | Conversational |
 | Complexity | Medium |
-| Agent Type | Multi Agent |
-| Components | Sub-agents with specialized learning capabilities |
+| Agent Type | Single Agent |
+| Components | Integrated learning capabilities |
 | Vertical | Education |
 
 ### Agent Architecture
 
-The Study and Learn Agent uses a hierarchical multi-agent architecture:
+The Study and Learn Agent uses a unified single-agent architecture that integrates all learning capabilities:
 
-- **Study Coordinator**: The root agent that orchestrates the entire learning process by delegating tasks to the specialized sub-agents.
-- **Content Retrieval Agent**: Fetches relevant educational content based on user input or learning goals.
-- **Personalization Agent**: Adapts content to the user's learning style, knowledge level, and preferences.
-- **Interaction Agent**: Engages with the user through conversational learning, answering questions, and providing explanations.
-- **Feedback and Assessment Agent**: Evaluates user responses to quizzes or exercises and provides constructive feedback.
-- **Progress Tracking Agent**: Monitors and records the user's learning journey, updating their profile.
+- **Study Coordinator**: A comprehensive agent that handles all aspects of the learning process, including content retrieval, personalization, interaction, assessment, and progress tracking.
 
-```mermaid
-graph TD
-    A[Study Coordinator] ---> B[Content Retrieval Agent]
-    A ---> C[Personalization Agent]
-    A ---> D[Interaction Agent]
-    A ---> E[Feedback and Assessment Agent]
-    A ---> F[Progress Tracking Agent]
-```
+The agent leverages Google Search for content retrieval and utilizes built-in memory capabilities for personalization and progress tracking.
 
 ## Tools and APIs Used
 
-Each sub-agent leverages specific tools to perform its analysis:
+The Study and Learn Agent leverages the following tools and capabilities:
 
-| Sub-Agent                | Tools Used         | Description |
-|--------------------------|-------------------|-------------|
-| Content Retrieval Agent  | Wikipedia Search  | Retrieves articles and summaries for learning. |
-| Personalization Agent    | Memory            | Stores and retrieves user data for a personalized experience. |
-| Interaction Agent        | Conversational Chain | Manages dialogue and provides clear explanations. |
-| Feedback and Assessment Agent | Custom Scoring Logic | Evaluates user responses and provides feedback. |
-| Progress Tracking Agent  | Memory            | Logs progress and updates the user's profile. |
+| Tool/Capability | Description |
+|-----------------|-------------|
+| Google Search   | Retrieves relevant educational content and information from the web |
+| Agent Memory    | Stores and retrieves user learning data for personalization and progress tracking |
+| Natural Language Processing | Evaluates user responses and provides intelligent feedback |
+
+## Core Capabilities
+
+The single agent integrates all essential learning functionalities:
+
+- **Learning Plan Generation**: Creates structured, phase-based learning roadmaps with clear milestones
+- **Content Retrieval and Synthesis**: Finds and synthesizes high-quality educational content from the web
+- **Personalization and Adaptation**: Tailors the learning experience to individual user needs and skill levels
+- **Interactive and Socratic Dialogue**: Fosters critical thinking through strategic questioning and conversation
+- **Feedback and Assessment**: Evaluates understanding and provides constructive, actionable feedback
+- **Progress Tracking and Reporting**: Monitors learning journeys and maintains comprehensive learning history
 
 ## Features
 
-- **Personalized Learning**: Adapts to individual user needs.
-- **Interactive Q&A**: Engages users with questions and exercises.
-- **Comprehensive Content**: Retrieves information from various sources.
-- **Progress Tracking**: Monitors and visualizes the learning journey.
-- **Modular Architecture**: Easily extendable with new agents and tools.
+- **Unified Learning Experience**: Single agent architecture that seamlessly integrates all learning capabilities
+- **Personalized Learning**: Adapts to individual user needs, learning styles, and skill levels
+- **Interactive Socratic Method**: Engages users with strategic questioning and guided discovery
+- **Comprehensive Content Retrieval**: Searches and synthesizes information from web sources
+- **Intelligent Assessment**: Provides constructive feedback and evaluates understanding
+- **Progress Tracking**: Monitors and maintains detailed learning history across sessions
+- **Structured Learning Plans**: Creates phase-based roadmaps with clear milestones
+- **Cognitive Load Management**: Breaks complex topics into digestible, well-organized sections
 
 ## Setup and Installation
 
@@ -110,25 +110,25 @@ poetry run adk web
 
 ## Sample Workflow
 
-This example demonstrates how a user request to "Teach me about photosynthesis" is processed through the multi-agent system.
+This example demonstrates how a user request to "Teach me about photosynthesis" is processed through the unified agent system.
 
 1. **User Request**: The user asks the Study and Learn Agent to explain photosynthesis.
 
-2. **Study Coordinator**: The coordinator receives the request and delegates the task to the appropriate sub-agent.
-   - **Action**: Calls the `Content Retrieval Agent`.
+2. **Goal Setting and Assessment**: The agent begins by understanding the user's learning objectives and assessing their current knowledge level through strategic questions.
 
-3. **Content Retrieval Agent**: This agent searches for information on photosynthesis.
-   - **Action**: Uses the Wikipedia Search tool to find a relevant article.
-   - **Output**: Returns the raw text of the article to the coordinator.
+3. **Learning Plan Creation**: Based on the assessment, the agent creates a structured, phase-based learning plan:
+   - 🔹 **Phase 1**: Basic concepts and terminology
+   - 🔸 **Phase 2**: Detailed process and chemical reactions  
+   - 🔹 **Phase 3**: Real-world applications and significance
 
-4. **Personalization Agent**: The coordinator passes the content to this agent to tailor it to the user.
-   - **Action**: Accesses the user's profile and learning history from memory to adapt the content.
-   - **Output**: Returns a simplified and structured version of the article.
+4. **Content Retrieval and Synthesis**: The agent uses Google Search to find current, accurate information about photosynthesis and synthesizes it into clear, digestible explanations tailored to the user's level.
 
-5. **Interaction Agent**: The coordinator sends the tailored content to this agent for user engagement.
-   - **Action**: Presents the information in a conversational format and asks the user if they want to take a short quiz.
+5. **Interactive Learning**: The agent presents information using Socratic questioning and interactive prompts:
+   - "Before I explain photosynthesis, what do you think plants need to make their own food?"
+   - Provides scaffolded explanations with visual formatting and clear connections
 
-6. **Feedback and Assessment Agent**: If the user agrees to the quiz, this agent evaluates their answers.
-   - **Action**: Scores the user's responses and generates personalized feedback.
+6. **Knowledge Checks**: Throughout the learning process, the agent administers quick assessments to verify understanding and provides immediate, constructive feedback.
 
-7. **Progress Tracking Agent**: The coordinator sends the performance data to this agent to log the user's progress.
+7. **Progress Tracking**: The agent continuously monitors the user's progress, noting topics covered, comprehension levels, and learning patterns for future sessions.
+
+8. **Session Summary**: At the end, the agent provides a comprehensive summary of what was learned and suggests next steps for continued learning.
