@@ -28,6 +28,12 @@ def save_content(filename: str, content: str):
         f.write(content)
     return {"status": f"Content saved to {filename}"}
 
+def read_file(filename: str):
+    """Reads the content of a file."""
+    with open(filename, "r", encoding="utf-8") as f:
+        content = f.read()
+    return {"content": content}
+
 crawler_agent = SubAgent(
     name="crawler-agent",
     description="Crawls a given URL, extracts its content and links, and saves the content to a file.",
@@ -39,6 +45,7 @@ summarizer_agent = SubAgent(
     name="summarizer-agent",
     description="Summarizes the content of all saved files into a single structured report.",
     prompt="You are a summarizer. Read all the .txt files in the current directory and create a detailed, structured summary in Markdown format.",
+    tools=["read_file"],
 )
 
 agent_instructions = """
@@ -54,7 +61,7 @@ save the content of each page, and then generate a comprehensive summary.
 """
 
 agent = create_deep_agent(
-    tools=[crawl_page, save_content],
+    tools=[crawl_page, save_content, read_file],
     instructions=agent_instructions,
     subagents=[crawler_agent, summarizer_agent],
     llm="gemini",
