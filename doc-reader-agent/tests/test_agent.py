@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
+import requests
 
 from doc_reader_agent.agent import crawl_url
 
