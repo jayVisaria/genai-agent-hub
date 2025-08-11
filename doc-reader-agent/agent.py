@@ -63,7 +63,7 @@ Here's how you'll do it:
     d.  The `crawler-agent` will return a list of new links. For each new link, check if it's already in `visited_urls.txt`.
     e.  If a link is not in `visited_urls.txt`, add it to `urls_to_visit.txt`.
     f.  Once you've processed all the new links, remove the URL you just crawled from `urls_to_visit.txt`.
-3.  After the `urls_to_visit.txt` file is empty, the crawling process is complete.
+3.  After the `urls_to_visit.txt` file is empty, the crawling process is complete. Now, use the `summarizer-agent` to read all the saved content and generate a final, structured summary.
 """
 
 agent = create_deep_agent(
