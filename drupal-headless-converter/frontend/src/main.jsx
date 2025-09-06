@@ -37,6 +37,10 @@ function App() {
     setIsConverting(false);
   };
 
+  const downloadCode = async () => {
+    // To be implemented in step 9
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Drupal to Headless CMS Converter</h1>
@@ -50,6 +54,9 @@ function App() {
         />
         <button className="btn btn-primary" onClick={startConversion} disabled={isConverting}>
           {isConverting ? 'Converting...' : 'Start Conversion'}
+        </button>
+        <button className="btn btn-secondary" onClick={downloadCode}>
+          Download Code
         </button>
       </div>
       <div className="mockup-code">
