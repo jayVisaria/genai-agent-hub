@@ -1,10 +1,10 @@
 import json
 from typing import List
-
+import asyncio
+import httpx
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-import requests
 from bs4 import BeautifulSoup
 from langchain_core.tools import tool
 from urllib.parse import urljoin
@@ -34,12 +34,12 @@ sitemap_prompt = ChatPromptTemplate.from_messages(
 def find_sitemap_urls(url: str) -> List[str]:
     try:
         sitemap_url = urljoin(url, "/sitemap.xml")
-        response = requests.get(sitemap_url)
+        response = httpx.get(sitemap_url)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "xml")
         urls = [loc.text for loc in soup.find_all("loc")]
         return [u for u in urls if u.startswith(url)]
-    except requests.exceptions.RequestException:
+    except httpx.RequestError:
         return []
 
 find_sitemap = sitemap_prompt | llm | StrOutputParser()
@@ -107,30 +107,34 @@ def synthesize_json_node(state: ParserState):
     state["final_json"] = json.dumps(final_json, indent=2)
 
 @tool
-def scrape_url(url: str) -> str:
+async def scrape_url(url: str, client: httpx.AsyncClient) -> str:
     """Scrapes the content of a given URL."""
     try:
-        response = requests.get(url)
+        response = await client.get(url)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "html.parser")
         return soup.get_text()
-    except requests.exceptions.RequestException as e:
+    except httpx.RequestError as e:
         return f"Error scraping URL: {e}"
 
-def crawl_node(state: ParserState):
-    if not state["urls_to_visit"]:
-        return
-    url = state["urls_to_visit"].pop(0)
-    state["current_url"] = url
-    state["visited_urls"].append(url)
-    html = scrape_url.invoke(url)
-    content_str = extract_page_specific_content.invoke({"html": html, "global_elements": state["global_elements"]})
-    try:
-        content_json = json.loads(content_str)
-        state["scraped_data"].append({"url": url, "content": content_json})
-    except json.JSONDecodeError:
-        state["scraped_data"].append({"url": url, "content": {"type": "error", "content": "Failed to parse content as JSON."}})
+async def crawl_node(state: ParserState):
+    batch_size = 10
+    urls_to_process = state["urls_to_visit"][:batch_size]
+    state["urls_to_visit"] = state["urls_to_visit"][batch_size:]
+    state["visited_urls"].extend(urls_to_process)
 
+    async with httpx.AsyncClient() as client:
+        tasks = [scrape_url.invoke(url, client=client) for url in urls_to_process]
+        results = await asyncio.gather(*tasks)
+
+    for url, html in zip(urls_to_process, results):
+        state["current_url"] = url
+        content_str = extract_page_specific_content.invoke({"html": html, "global_elements": state["global_elements"]})
+        try:
+            content_json = json.loads(content_str)
+            state["scraped_data"].append({"url": url, "content": content_json})
+        except json.JSONDecodeError:
+            state["scraped_data"].append({"url": url, "content": {"type": "error", "content": "Failed to parse content as JSON."}})
 
 def should_continue_node(state: ParserState):
     if not state["urls_to_visit"]:
@@ -156,15 +160,17 @@ def create_parser_graph():
     workflow.add_edge("synthesize_json", END)
     return workflow.compile()
 
-def run_parser(url: str):
+async def arun_parser(url: str):
     graph = create_parser_graph()
     sitemap_urls = find_sitemap_urls(url)
     initial_state = {"initial_url": url, "urls_to_visit": sitemap_urls, "visited_urls": [], "scraped_data": [], "current_url": "", "global_elements": {}, "final_json": ""}
-    final_state = graph.invoke(initial_state)
+    final_state = await graph.ainvoke(initial_state)
     return final_state["final_json"]
 
 if __name__ == "__main__":
-    print(run_parser("https://www.drupal.org"))
-
+    async def main():
+        result = await arun_parser("https://www.drupal.org")
+        print(result)
+    asyncio.run(main())
 
 
