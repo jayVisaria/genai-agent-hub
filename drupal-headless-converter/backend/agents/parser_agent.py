@@ -21,16 +21,6 @@ def scrape_url(url: str) -> str:
         return f"Error scraping URL: {e}"
 
 
-@tool
-def find_links(url: str, html_content: str) -> list[str]:
-    """Finds all the links on a given URL."""
-    try:
-        soup = BeautifulSoup(html_content, "html.parser")
-        links = [a["href"] for a in soup.find_all("a", href=True)]
-        return [urljoin(url, link) for link in links]
-    except requests.exceptions.RequestException as e:
-        return f"Error finding links: {e}"
-
 
 class ParserState(TypedDict):
     initial_url: str
