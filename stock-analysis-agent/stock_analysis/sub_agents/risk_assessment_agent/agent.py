@@ -3,14 +3,13 @@
 from datetime import datetime
 from google.adk.agents import LlmAgent
 from google.adk.tools import google_search
-
-from . import prompt
+from stock_analysis.prompts import risk_assessment_prompt
 
 MODEL = "gemini-2.5-pro-preview-05-06"
 
 # Format current date for dynamic insertion
 current_date = datetime.now().strftime("%B %d, %Y")
-formatted_prompt = prompt.RISK_ASSESSMENT_PROMPT.format(current_date=current_date)
+formatted_prompt = risk_assessment_prompt.RISK_ASSESSMENT_PROMPT.format(current_date=current_date)
 
 risk_assessment_agent = LlmAgent(
     name="risk_assessment_agent",
