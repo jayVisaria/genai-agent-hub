@@ -91,3 +91,4 @@ You will be given a JSON object with two main keys: `global_elements` and `pages
 *   If you encounter an error (e.g., a command fails, a file cannot be written), analyze the error message, backtrack if necessary, and try a different approach. Your goal is to be resilient and find a way to complete the task.
 """
     return create_react_agent(llm, tools, prompt=prompt)
+
