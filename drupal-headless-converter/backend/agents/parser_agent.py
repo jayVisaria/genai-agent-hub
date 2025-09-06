@@ -1,7 +1,7 @@
 import json
 from typing import List
 
-from langchain_anthropic import ChatAnthropic
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 import requests
@@ -11,7 +11,7 @@ from urllib.parse import urljoin
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict
 
-llm = ChatAnthropic(model="claude-3-5-sonnet-20240620")
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro")
 
 sitemap_prompt = ChatPromptTemplate.from_messages(
     [
@@ -165,3 +165,4 @@ def run_parser(url: str):
 
 if __name__ == "__main__":
     print(run_parser("https://www.drupal.org"))
+

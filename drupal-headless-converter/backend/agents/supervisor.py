@@ -1,7 +1,7 @@
 from typing import TypedDict, List
 from langchain_core.messages import BaseMessage
 from langgraph.graph import StateGraph, END
-from langchain_anthropic import ChatAnthropic
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import create_react_agent
 from langchain_core.tools import Tool
 
@@ -13,7 +13,7 @@ class SupervisorState(TypedDict):
     next: str
 
 
-llm = ChatAnthropic(model="claude-3-5-sonnet-20240620")
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro")
 
 parser_agent = run_parser
 builder_agent = create_builder_agent()
