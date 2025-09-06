@@ -6,15 +6,17 @@ from unittest.mock import patch
 
 class TestBuilderTools(unittest.TestCase):
 
-    @patch('drupal_headless_converter.backend.agents.builder_agent.ChatGoogleGenerativeAI')
-    def setUp(self, mock_llm):
+    def setUp(self):
         self.test_dir = "test_builder_tools"
         if os.path.exists(self.test_dir):
             shutil.rmtree(self.test_dir)
         os.makedirs(self.test_dir)
+        self.patcher = patch('drupal_headless_converter.backend.agents.builder_agent.ChatGoogleGenerativeAI')
+        self.mock_llm = self.patcher.start()
 
     def tearDown(self):
         shutil.rmtree(self.test_dir)
+        self.patcher.stop()
 
     def test_write_and_read_file(self):
         file_path = os.path.join(self.test_dir, "test.txt")
@@ -32,6 +34,7 @@ class TestBuilderTools(unittest.TestCase):
         dir_path = os.path.join(self.test_dir, "new_dir")
         make_directory.invoke({"path": dir_path})
         self.assertTrue(os.path.isdir(dir_path))
+
 
 
 
