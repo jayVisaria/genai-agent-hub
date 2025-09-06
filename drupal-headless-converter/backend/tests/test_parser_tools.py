@@ -11,10 +11,10 @@ class TestParserTools(unittest.TestCase):
     @patch('requests.get')
     def test_scrape_url(self, mock_get):
         mock_response = MagicMock()
-        mock_response.text = "<html><body><h1>Test</h1><p>This is a test.</p></body></html>"
+        mock_response.content = b"<html><body><h1>Test</h1><p>This is a test.</p></body></html>"
         mock_get.return_value = mock_response
 
-        result = scrape_url("http://example.com")
+        result = scrape_url.invoke({"url": "http://example.com"})
         self.assertIn("Test", result)
         self.assertIn("This is a test.", result)
 
@@ -26,6 +26,6 @@ class TestParserTools(unittest.TestCase):
             <a href="/page1">Duplicate</a>
         </body></html>
         """
-        links = find_links(html_content, "http://example.com")
+        links = find_links.invoke({"html_content": html_content, "base_url": "http://example.com"})
         self.assertEqual(len(links), 2)
         self.assertIn("http://example.com/page1", links)
