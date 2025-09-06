@@ -31,15 +31,16 @@ sitemap_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-def find_sitemap_urls(url: str) -> List[str]:
+async def find_sitemap_urls(url: str) -> List[str]:
     try:
         sitemap_url = urljoin(url, "/sitemap.xml")
-        response = httpx.get(sitemap_url)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.content, "xml")
-        urls = [loc.text for loc in soup.find_all("loc")]
-        return [u for u in urls if u.startswith(url)]
-    except httpx.RequestError:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(sitemap_url)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.content, "xml")
+            urls = [loc.text for loc in soup.find_all("loc")]
+            return [u for u in urls if u.startswith(url)]
+    except httpx.HTTPStatusError:
         return []
 
 find_sitemap = sitemap_prompt | llm | StrOutputParser()
@@ -162,7 +163,7 @@ def create_parser_graph():
 
 async def arun_parser(url: str):
     graph = create_parser_graph()
-    sitemap_urls = find_sitemap_urls(url)
+    sitemap_urls = await find_sitemap_urls(url)
     initial_state = {"initial_url": url, "urls_to_visit": sitemap_urls, "visited_urls": [], "scraped_data": [], "current_url": "", "global_elements": {}, "final_json": ""}
     final_state = await graph.ainvoke(initial_state)
     return final_state["final_json"]
