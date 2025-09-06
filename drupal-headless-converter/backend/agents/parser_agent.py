@@ -4,6 +4,7 @@ from typing import List
 import requests
 from bs4 import BeautifulSoup
 from langchain_core.tools import tool
+from urllib.parse import urljoin
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict
 
@@ -21,13 +22,12 @@ def scrape_url(url: str) -> str:
 
 
 @tool
-def find_links(url: str) -> list[str]:
+def find_links(url: str, html_content: str) -> list[str]:
     """Finds all the links on a given URL."""
     try:
-        response = requests.get(url)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.content, "html.parser")
-        return [a["href"] for a in soup.find_all("a", href=True)]
+        soup = BeautifulSoup(html_content, "html.parser")
+        links = [a["href"] for a in soup.find_all("a", href=True)]
+        return [urljoin(url, link) for link in links]
     except requests.exceptions.RequestException as e:
         return f"Error finding links: {e}"
 
@@ -48,7 +48,7 @@ def crawl_node(state: ParserState):
     state["visited_urls"].append(url)
     content = scrape_url.invoke({"url": url})
     state["scraped_data"].append({"url": url, "content": content})
-    links = find_links.invoke({"url": url})
+    links = find_links.invoke({"url": url, "html_content": content})
     for link in links:
         if link not in state["visited_urls"] and link not in state["urls_to_visit"]:
             state["urls_to_visit"].append(link)
@@ -83,5 +83,6 @@ def run_parser(url: str):
 
 if __name__ == "__main__":
     print(run_parser("https://www.drupal.org"))
+
 
 
