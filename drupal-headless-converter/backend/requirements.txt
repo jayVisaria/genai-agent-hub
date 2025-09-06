@@ -1,6 +1,7 @@
 fastapi
 langgraph
 requests
+httpx
 beautifulsoup4
 lxml
 langchain-google-genai
