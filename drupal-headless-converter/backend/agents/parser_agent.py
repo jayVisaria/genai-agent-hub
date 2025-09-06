@@ -49,6 +49,7 @@ def should_continue_node(state: ParserState):
 
 def create_parser_graph():
     workflow = StateGraph(ParserState)
+    workflow.add_node("find_global_elements", find_global_elements_node)
     workflow.add_node("crawl", crawl_node)
     workflow.add_conditional_edges(
         "crawl",
@@ -58,18 +59,20 @@ def create_parser_graph():
             "end": END,
         },
     )
-    workflow.add_edge(START, "crawl")
+    workflow.add_edge(START, "find_global_elements")
+    workflow.add_edge("find_global_elements", "crawl")
     return workflow.compile()
 
 def run_parser(url: str):
     graph = create_parser_graph()
     sitemap_urls = find_sitemap.invoke({"url": url})
-    initial_state = {"initial_url": url, "urls_to_visit": sitemap_urls, "visited_urls": [], "scraped_data": [], "current_url": ""}
+    initial_state = {"initial_url": url, "urls_to_visit": sitemap_urls, "visited_urls": [], "scraped_data": [], "current_url": "", "global_elements": {}}
     final_state = graph.invoke(initial_state)
     return json.dumps(final_state["scraped_data"], indent=2)
 
 if __name__ == "__main__":
     print(run_parser("https://www.drupal.org"))
+
 
 
 
