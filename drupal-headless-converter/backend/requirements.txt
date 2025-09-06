@@ -3,6 +3,7 @@ langgraph
 requests
 beautifulsoup4
 lxml
-langchain-anthropic
+langchain-google-genai
 uvicorn
 python-multipart
+marked
