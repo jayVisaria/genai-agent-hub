@@ -166,3 +166,4 @@ def run_parser(url: str):
 if __name__ == "__main__":
     print(run_parser("https://www.drupal.org"))
 
+
