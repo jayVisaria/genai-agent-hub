@@ -23,3 +23,4 @@ fundamental_analysis_agent = LlmAgent(
     output_key="fundamental_analysis_output",
     tools=[google_search],
 )
+
