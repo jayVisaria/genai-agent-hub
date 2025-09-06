@@ -3,7 +3,8 @@ import json
 import shutil
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse, FileResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
+import requests
 
 from agents.supervisor import app
 
@@ -12,13 +13,20 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 class ConvertRequest(BaseModel):
-    url: str
+    url: HttpUrl
 
 fastapi_app = FastAPI()
 
 @fastapi_app.post("/convert")
 async def convert(request: ConvertRequest):
     logger.info(f"Received conversion request for URL: {request.url}")
+    try:
+        response = requests.head(str(request.url), allow_redirects=True)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        error_message = f"Invalid or inaccessible URL: {e}"
+        logger.error(error_message)
+        raise HTTPException(status_code=400, detail=error_message)
     
     async def event_stream():
         try:
@@ -52,3 +60,4 @@ async def download():
     except Exception as e:
         logger.error(f"Failed to create or send the zip archive: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to create or send the zip archive.")
+
