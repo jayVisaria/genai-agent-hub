@@ -58,6 +58,11 @@ function App() {
     a.click();
   };
 
+  const copyLogsToClipboard = () => {
+    const logText = logs.map((log) => log.content).join("\n");
+    navigator.clipboard.writeText(logText);
+  };
+
   const renderLog = (log, index) => {
     const htmlContent = marked(log.content);
     let prefix = "$";
@@ -112,7 +117,9 @@ function App() {
                 ) : "Start Conversion"}
               </button>
               <button
-                className="btn btn-secondary btn-lg bg-gray-600 hover:bg-gray-700 border-none"
+                className={`btn btn-secondary btn-lg border-none ${
+                  conversionComplete ? "bg-green-500 hover:bg-green-600 animate-pulse" : "bg-gray-600 hover:bg-gray-700"
+                }`}
                 onClick={downloadCode}
                 disabled={!conversionComplete}
               >
@@ -122,11 +129,16 @@ function App() {
           </div>
         </div>
 
-        <div className="mockup-code bg-gray-800 text-sm shadow-2xl">
-          <div className="p-4 h-96 overflow-y-auto">
-            {logs.map(renderLog)}
-            <div ref={logsEndRef} />
+        <div className="relative">
+          <div className="mockup-code bg-gray-800 text-sm shadow-2xl">
+            <div className="p-4 h-96 overflow-y-auto">
+              {logs.map(renderLog)}
+              <div ref={logsEndRef} />
+            </div>
           </div>
+          <button className="absolute top-2 right-2 btn btn-sm btn-ghost" onClick={copyLogsToClipboard}>
+            Copy Logs
+          </button>
         </div>
       </div>
     </div>
