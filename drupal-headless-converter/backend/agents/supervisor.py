@@ -1,16 +1,10 @@
-from typing import TypedDict, List
-from langchain_core.messages import BaseMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import create_react_agent
 from langchain_core.tools import Tool
 
 from .parser_agent import run_parser
 from .supervisor_logic import create_supervisor_graph
-
-class SupervisorState(TypedDict):
-    messages: List[BaseMessage]
-    next: str
-
+from .state import SupervisorState
 
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro")
 
@@ -68,6 +62,7 @@ Given the user's request, determine the next worker to act. Each worker will per
 supervisor_agent = create_react_agent(llm, [parser_tool, builder_tool], prompt=supervisor_prompt)
 
 app = create_supervisor_graph()
+
 
 
 
