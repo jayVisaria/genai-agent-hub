@@ -38,7 +38,13 @@ function App() {
   };
 
   const downloadCode = async () => {
-    // To be implemented in step 9
+    const response = await fetch('/download');
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'website.zip';
+    a.click();
   };
 
   return (
@@ -73,5 +79,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </React.StrictMode>
 );
+
 
 
