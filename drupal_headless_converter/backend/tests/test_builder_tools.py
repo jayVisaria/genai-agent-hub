@@ -5,7 +5,8 @@ from drupal_headless_converter.backend.agents.builder_agent import read_file, wr
 
 class TestBuilderTools(unittest.TestCase):
 
-    def setUp(self):
+    @patch('drupal_headless_converter.backend.agents.builder_agent.ChatGoogleGenerativeAI')
+    def setUp(self, mock_llm):
         self.test_dir = "test_builder_tools"
         if os.path.exists(self.test_dir):
             shutil.rmtree(self.test_dir)
