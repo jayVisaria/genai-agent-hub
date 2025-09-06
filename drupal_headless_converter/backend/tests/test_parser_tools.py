@@ -5,7 +5,8 @@ from drupal_headless_converter.backend.agents.parser_agent import scrape_url
 class TestParserTools(unittest.TestCase):
 
     @patch('requests.get')
-    def test_scrape_url(self, mock_get):
+    @patch('drupal_headless_converter.backend.agents.parser_agent.ChatGoogleGenerativeAI')
+    def test_scrape_url(self, mock_llm, mock_get):
         mock_response = MagicMock()
         mock_response.content = "<html><body><h1>Test</h1><p>This is a test.</p></body></html>"
         mock_get.return_value = mock_response
