@@ -34,3 +34,4 @@ stock_prediction_agent = LlmAgent(
     tools=[google_search],
 )
 
+
