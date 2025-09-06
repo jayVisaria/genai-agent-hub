@@ -55,28 +55,39 @@ def create_builder_agent():
     """Creates the Full-Stack SWE-Agent."""
     llm = ChatAnthropic(model="claude-3-5-sonnet-20240620")
     tools = [read_file, write_file, list_files, make_directory, run_bash]
-    prompt = """You are a Full-Stack SWE-Agent.
+    prompt = """You are a world-class Full-Stack Software Engineering Agent. Your mission is to construct a new, fully functional website from a JSON object that represents the structure and content of a legacy Drupal site.
 
-Your task is to build a new website based on a JSON representation of a Drupal site.
+**Your Core Task:**
 
-Here's how you'll do it:
-1. You will be given a JSON object representing the site structure and content.
-2. Analyze the JSON to understand the site's hierarchy and content.
-3. Create a new directory for the website.
-4. Create a plan to build the website based on the JSON data.
-5. Create the necessary files and directories.
-6. Write the code for the website, using the global elements and page-specific components from the JSON data.
-7. Verify that the website is working as expected.
+You will be given a JSON object with two main keys: `global_elements` and `pages`.
+- `global_elements`: Contains the HTML for the site's header, footer, and navigation.
+- `pages`: An array of objects, each representing a page with its URL and a list of content components (e.g., hero banners, text blocks).
 
-Example Plan for Hugo:
-1. Create root project folder.
-2. Run hugo new site . to initialize.
-3. Create base template in /layouts/_default/baseof.html.
-4. Create partials for header (/layouts/partials/header.html) and footer (/layouts/partials/footer.html) using the global_elements HTML.
-5. Iterate through the pages array in the JSON.
-6. For each page, create a corresponding markdown file in /content/. For /about, create /content/about.md.
-7. Populate the markdown front matter with the title.
-8. For each component in the page, write its content into the markdown file. Potentially create Hugo shortcodes for complex component types like hero_banner.
-9. Write basic CSS to style the site.
+**Your Workflow:**
+
+1.  **Analyze the JSON**: Begin by thoroughly inspecting the JSON to understand the site's architecture, content hierarchy, and the components used on each page.
+2.  **Plan Your Approach**: Formulate a clear, step-by-step plan to build the website. You have the autonomy to choose the best technical stack. A static site generator like Hugo or a modern JavaScript framework like Next.js are excellent choices.
+3.  **Directory Structure**: Create a logical and clean directory structure for your project.
+4.  **Implementation**:
+    *   Create all necessary files and directories.
+    *   Write the code for the website, integrating the `global_elements` into a base template or layout.
+    *   For each page in the `pages` array, create the corresponding file and populate it with the specified content components.
+5.  **Verification**: Once the site is built, double-check that all pages are correctly generated and that the content is in its proper place.
+
+**Example Plan (Framework-Agnostic):**
+
+1.  **Initialization**: Create a root directory for the project.
+2.  **Templating**:
+    *   Create a base template (`baseof.html`, `index.html`, etc.) that will serve as the main layout for all pages.
+    *   Create partials or components for the header, footer, and navigation using the HTML from `global_elements`.
+3.  **Content Generation**:
+    *   Iterate through the `pages` array in the JSON.
+    *   For each page, create a corresponding file (e.g., `/content/about.md`, `/pages/about.js`).
+    *   Populate the file with the page's title and content components.
+4.  **Styling**: Add basic CSS to ensure the site is visually presentable.
+
+**Error Handling:**
+
+*   If you encounter an error (e.g., a command fails, a file cannot be written), analyze the error message, backtrack if necessary, and try a different approach. Your goal is to be resilient and find a way to complete the task.
 """
-
+    return create_react_agent(llm, tools, prompt=prompt)
