@@ -3,8 +3,7 @@
 from datetime import datetime
 from google.adk.agents import Agent
 from google.adk.tools.agent_tool import AgentTool
-
-from . import prompt
+from stock_analysis.prompts import analysis_prompt
 from ..fundamental_agent import fundamental_analysis_agent
 from ..technical_agent import technical_analysis_agent
 from ..sentiment_agent import sentiment_analysis_agent
@@ -16,7 +15,7 @@ MODEL = "gemini-2.5-pro-preview-05-06"
 
 # Format current date for dynamic insertion
 current_date = datetime.now().strftime("%B %d, %Y")
-formatted_prompt = prompt.ANALYSIS_ORCHESTRATOR_PROMPT.format(current_date=current_date)
+formatted_prompt = analysis_prompt.ANALYSIS_ORCHESTRATOR_PROMPT.format(current_date=current_date)
 
 analysis_orchestrator = Agent(
     name="analysis_orchestrator",
@@ -35,3 +34,4 @@ analysis_orchestrator = Agent(
         AgentTool(agent=stock_prediction_agent),
     ],
 )
+
