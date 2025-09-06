@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
-from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
 
 @tool
 def scrape_url(url: str) -> str:
@@ -29,7 +29,7 @@ def find_links(url: str) -> list[str]:
 
 def create_parser_agent():
     """Creates the Drupal content intelligence agent."""
-    llm = ChatOpenAI(model="gpt-4o")
+    llm = ChatAnthropic(model="claude-3-5-sonnet-20240620")
     tools = [scrape_url, find_links]
     prompt = """You are a Drupal Content Intelligence Agent.
 
@@ -45,5 +45,5 @@ Here's how you'll do it:
 
 The final JSON should be a list of objects, where each object has a "url" and a "content" key."""
 
-    agent_executor = create_react_agent(llm, tools, messages_modifier=prompt)
+    agent_executor = create_react_agent(llm, tools, prompt=prompt)
     return agent_executor
