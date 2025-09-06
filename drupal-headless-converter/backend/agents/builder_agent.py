@@ -3,7 +3,7 @@ import subprocess
 
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
-from langchain_anthropic import ChatAnthropic
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 @tool
 def read_file(path: str) -> str:
@@ -53,7 +53,7 @@ def run_bash(command: str) -> str:
 
 def create_builder_agent():
     """Creates the Full-Stack SWE-Agent."""
-    llm = ChatAnthropic(model="claude-3-5-sonnet-20240620")
+    llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro")
     tools = [read_file, write_file, list_files, make_directory, run_bash]
     prompt = """You are a world-class Full-Stack Software Engineering Agent. Your mission is to construct a new, fully functional website from a JSON object that represents the structure and content of a legacy Drupal site.
 
