@@ -2,6 +2,7 @@ import unittest
 import os
 import shutil
 from drupal_headless_converter.backend.agents.builder_agent import read_file, write_file, list_files, make_directory
+from unittest.mock import patch
 
 class TestBuilderTools(unittest.TestCase):
 
