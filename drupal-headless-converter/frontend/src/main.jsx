@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom/client';
-import { marked } from 'marked';
+import React, { useState, useEffect, useRef } from "react";
+import ReactDOM from "react-dom/client";
+import { marked } from "marked";
 
 function App() {
-  const [url, setUrl] = useState('');
-  const [logs, setLogs] = useState('');
+  const [url, setUrl] = useState("");
+  const [logs, setLogs] = useState([]);
   const [isConverting, setIsConverting] = useState(false);
   const [conversionComplete, setConversionComplete] = useState(false);
   const logsEndRef = useRef(null);
@@ -18,13 +18,11 @@ function App() {
   const startConversion = async () => {
     setIsConverting(true);
     setConversionComplete(false);
-    setLogs('Starting conversion...\n');
+    setLogs([{ type: "info", content: "Starting conversion..." }]);
 
-    const response = await fetch('/convert', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const response = await fetch("/convert", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),
     });
 
@@ -35,81 +33,107 @@ function App() {
       const { value, done } = await reader.read();
       if (done) break;
       const chunk = decoder.decode(value);
-      const lines = chunk.split('\n');
+      const lines = chunk.split("\n");
       for (const line of lines) {
-        if (line.startsWith('data:')) {
+        if (line.startsWith("data:")) {
           const data = JSON.parse(line.substring(5));
-          setLogs((prev) => prev + data.content);
+          const logType = data.content.includes("**Error**") ? "error" : "info";
+          setLogs((prev) => [...prev, { type: logType, content: data.content }]);
         }
       }
     }
 
-    setLogs((prev) => prev + '\nConversion complete!\n');
+    setLogs((prev) => [...prev, { type: "success", content: "\nConversion complete!" }]);
     setIsConverting(false);
     setConversionComplete(true);
   };
 
   const downloadCode = async () => {
-    const response = await fetch('/download');
+    const response = await fetch("/download");
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'website.zip';
+    a.download = "website.zip";
     a.click();
   };
 
+  const renderLog = (log, index) => {
+    const htmlContent = marked(log.content);
+    let prefix = "$";
+    let textColor = "text-white";
+
+    if (log.type === "error") {
+      prefix = "!";
+      textColor = "text-red-400";
+    } else if (log.type === "success") {
+      prefix = "+";
+      textColor = "text-green-400";
+    }
+
+    return (
+      <div key={index} className={`flex items-start ${textColor}`}>
+        <pre data-prefix={prefix} className="mr-2"></pre>
+        <code dangerouslySetInnerHTML={{ __html: htmlContent }} />
+      </div>
+    );
+  };
+
   return (
-    <div className="container mx-auto p-4 font-sans">
-      <header className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-800">Drupal to Headless CMS Converter</h1>
-        <p className="text-lg text-gray-600 mt-2">
-          Instantly convert your legacy Drupal site into a modern, headless CMS-powered static website.
-        </p>
-      </header>
+    <div className="min-h-screen bg-gray-900 text-white font-sans">
+      <div className="container mx-auto p-4 md:p-8">
+        <header className="text-center mb-10">
+          <h1 className="text-5xl font-bold text-cyan-400">Drupal Headless Converter</h1>
+          <p className="text-xl text-gray-400 mt-3">
+            Seamlessly migrate your Drupal site to a modern, static architecture.
+          </p>
+        </header>
 
-      <div className="bg-white shadow-lg rounded-lg p-6 mb-8">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Instructions</h2>
-        <ol className="list-decimal list-inside text-gray-600 space-y-2">
-          <li>Enter the full URL of the Drupal website you want to convert.</li>
-          <li>Click "Start Conversion" to begin the process.</li>
-          <li>The agent will first analyze the sitemap, then identify global elements (header, footer), and finally extract content from each page.</li>
-          <li>Once the conversion is complete, you can download the generated code as a zip file.</li>
-        </ol>
-      </div>
+        <div className="bg-gray-800 shadow-2xl rounded-xl p-6 md:p-8 mb-10">
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <input
+              type="text"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="Enter Drupal URL (e.g., https://www.drupal.org)"
+              className="input input-bordered w-full p-3 text-lg bg-gray-700 border-gray-600 focus:ring-cyan-500 focus:border-cyan-500"
+            />
+            <div className="flex gap-4">
+              <button
+                className="btn btn-primary btn-lg bg-cyan-500 hover:bg-cyan-600 border-none"
+                onClick={startConversion}
+                disabled={isConverting}
+              >
+                {isConverting ? (
+                  <>
+                    <span className="loading loading-spinner"></span>
+                    Converting...
+                  </>
+                ) : "Start Conversion"}
+              </button>
+              <button
+                className="btn btn-secondary btn-lg bg-gray-600 hover:bg-gray-700 border-none"
+                onClick={downloadCode}
+                disabled={!conversionComplete}
+              >
+                Download Code
+              </button>
+            </div>
+          </div>
+        </div>
 
-      <div className="flex items-center gap-4 mb-8">
-        <input
-          type="text"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="Enter Drupal URL (e.g., https://www.drupal.org)"
-          className="input input-bordered w-full p-3 text-lg"
-        />
-        <button className="btn btn-primary btn-lg" onClick={startConversion} disabled={isConverting}>
-          {isConverting ? (
-            <>
-              <span className="loading loading-spinner"></span>
-              Converting...
-            </>
-          ) : 'Start Conversion'}
-        </button>
-        <button className="btn btn-secondary btn-lg" onClick={downloadCode} disabled={!conversionComplete}>
-          Download Code
-        </button>
-      </div>
-
-      <div className="mockup-code bg-gray-800 text-white">
-        <pre data-prefix="$" className="p-4">
-          <code dangerouslySetInnerHTML={{ __html: marked(logs) }} />
-          <div ref={logsEndRef} />
-        </pre>
+        <div className="mockup-code bg-gray-800 text-sm shadow-2xl">
+          <div className="p-4 h-96 overflow-y-auto">
+            {logs.map(renderLog)}
+            <div ref={logsEndRef} />
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
