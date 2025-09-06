@@ -36,7 +36,7 @@ def crawl_node(state: ParserState):
     url = state["urls_to_visit"].pop(0)
     state["current_url"] = url
     state["visited_urls"].append(url)
-    content = scrape_url.invoke({"url": url})
+    content = extract_page_specific_content.invoke({"url": url, "global_elements": state["global_elements"]})
     state["scraped_data"].append({"url": url, "content": content})
 
 
