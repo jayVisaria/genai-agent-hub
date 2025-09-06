@@ -1,12 +1,11 @@
 import json
-from typing import Annotated, List
+from typing import List
 
 import requests
 from bs4 import BeautifulSoup
 from langchain_core.tools import tool
-from langchain_anthropic import ChatAnthropic
 from langgraph.graph import StateGraph, START, END
-from typing_extensions import TypedDict
+from typing import TypedDict
 
 
 @tool
@@ -34,13 +33,14 @@ def find_links(url: str) -> list[str]:
 
 
 class ParserState(TypedDict):
+    initial_url: str
     urls_to_visit: List[str]
     visited_urls: List[str]
     scraped_data: List[dict]
     current_url: str
 
 
-def crawl(state: ParserState):
+def crawl_node(state: ParserState):
     if not state["urls_to_visit"]:
         return
     url = state["urls_to_visit"].pop(0)
@@ -54,23 +54,34 @@ def crawl(state: ParserState):
             state["urls_to_visit"].append(link)
 
 
-def should_continue(state: ParserState):
+def should_continue_node(state: ParserState):
     if not state["urls_to_visit"]:
         return "end"
     else:
         return "continue"
 
 
-workflow = StateGraph(ParserState)
-workflow.add_node("crawl", crawl)
-workflow.add_conditional_edges(
-    "crawl",
-    should_continue,
-    {
-        "continue": "crawl",
-        "end": END,
-    },
-)
-workflow.add_edge(START, "crawl")
-app = workflow.compile()
+def create_parser_graph():
+    workflow = StateGraph(ParserState)
+    workflow.add_node("crawl", crawl_node)
+    workflow.add_conditional_edges(
+        "crawl",
+        should_continue_node,
+        {
+            "continue": "crawl",
+            "end": END,
+        },
+    )
+    workflow.add_edge(START, "crawl")
+    return workflow.compile()
+
+def run_parser(url: str):
+    graph = create_parser_graph()
+    initial_state = {"initial_url": url, "urls_to_visit": [url], "visited_urls": [], "scraped_data": [], "current_url": ""}
+    final_state = graph.invoke(initial_state)
+    return json.dumps(final_state["scraped_data"], indent=2)
+
+if __name__ == "__main__":
+    print(run_parser("https://www.drupal.org"))
+
 
