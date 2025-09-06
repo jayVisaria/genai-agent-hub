@@ -3,6 +3,7 @@
 from datetime import datetime
 from google.adk.agents import Agent
 from google.adk.tools.agent_tool import AgentTool
+from .tools import stock_info_tool
 from stock_analysis.prompts import analysis_prompt
 from ..fundamental_agent import fundamental_analysis_agent
 from ..technical_agent import technical_analysis_agent
@@ -26,6 +27,7 @@ analysis_orchestrator = Agent(
     ),
     instruction=formatted_prompt,
     tools=[
+        stock_info_tool,
         AgentTool(agent=fundamental_analysis_agent),
         AgentTool(agent=technical_analysis_agent),
         AgentTool(agent=sentiment_analysis_agent),
