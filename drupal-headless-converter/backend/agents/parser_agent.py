@@ -17,11 +17,15 @@ sitemap_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "You are an expert at finding sitemaps for websites. "
-            "Given a URL, find the sitemap and return a list of all the URLs in it. "
-            "Only return URLs that are sub-pages of the initial URL. "
-            "For example, if the initial URL is https://www.drupal.org, "
-            "only return URLs that start with https://www.drupal.org.",
+            """You are a highly specialized web scraping expert with a deep understanding of XML sitemaps. 
+            Your task is to analyze a given URL, locate its sitemap, and extract all the URLs contained within it.
+
+**Instructions:**
+
+1.  Given a base URL, find the sitemap. The most common location is `/sitemap.xml`.
+2.  Parse the sitemap and extract every URL.
+3.  **Crucially, you must only return URLs that are sub-pages of the initial base URL.** For example, if the base URL is `https://www.drupal.org`, you should only return URLs that begin with `https://www.drupal.org`.
+4.  Return the URLs as a list of strings. If you cannot find a sitemap or if there are no relevant URLs, return an empty list.""",
         ),
         ("user", "{url}"),
     ]
@@ -44,9 +48,14 @@ global_elements_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "You are an expert at identifying global elements in a website's HTML. "
-            "Given the HTML content of a homepage, identify the header, footer, and navigation elements. "
-            "Return these elements as a JSON object with keys 'header', 'footer', and 'nav'.",
+            """You are an expert in HTML structure analysis. Your task is to identify the global elements of a website—specifically the header, footer, and navigation menu—from the HTML content of its homepage.
+
+**Instructions:**
+
+1.  Analyze the provided HTML content.
+2.  Identify the HTML sections that correspond to the `<header>`, `<footer>`, and `<nav>` elements.
+3.  Return these elements as a single, clean JSON object with the keys `header`, `footer`, and `nav`. The values should be the raw HTML content of these elements.
+4.  If any of these elements are not found, the value for the corresponding key should be `null`.""",
         ),
         ("user", "{html}"),
     ]
@@ -72,12 +81,17 @@ page_specific_content_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "You are an expert at extracting page-specific content from a website's HTML. "
-            "Given the HTML content of a page and the global elements (header, footer, nav), "
-            "extract the content that is unique to the page. "
-            "Return the content as a list of JSON objects, where each object has a 'type' and 'content' key. "
-            "For example, a hero banner could be {'type': 'hero_banner', 'content': '<h1>Welcome</h1>'}. "
-            "A text block could be {'type': 'text', 'content': '<p>Some text.</p>'}.",
+            """You are a content extraction specialist. Your task is to analyze the HTML of a webpage and extract its page-specific content, distinguishing it from the global elements (header, footer, nav).
+
+**Instructions:**
+
+1.  You will be given the full HTML of a webpage and a JSON object containing the global elements.
+2.  Your goal is to extract the content that is unique to this page.
+3.  Structure the extracted content as a list of JSON objects, where each object has a `type` and a `content` key.
+    *   The `type` key should describe the content's nature (e.g., `hero_banner`, `text_block`, `image_gallery`).
+    *   The `content` key should contain the corresponding HTML.
+4.  **Example**: A hero banner might be represented as `{'type': 'hero_banner', 'content': '<h1>Welcome to our Site</h1>'}`. A simple paragraph might be `{'type': 'text', 'content': '<p>This is a paragraph.</p>'}`.
+5.  Return the final output as a single JSON array.""",
         ),
         ("user", "HTML:\n{html}\n\nGlobal Elements:\n{global_elements}"),
     ]
@@ -110,8 +124,13 @@ def crawl_node(state: ParserState):
     state["current_url"] = url
     state["visited_urls"].append(url)
     html = scrape_url.invoke(url)
-    content = extract_page_specific_content.invoke({"html": html, "global_elements": state["global_elements"]})
-    state["scraped_data"].append({"url": url, "content": json.loads(content)})
+    content_str = extract_page_specific_content.invoke({"html": html, "global_elements": state["global_elements"]})
+    try:
+        content_json = json.loads(content_str)
+        state["scraped_data"].append({"url": url, "content": content_json})
+    except json.JSONDecodeError:
+        state["scraped_data"].append({"url": url, "content": {"type": "error", "content": "Failed to parse content as JSON."}})
+
 
 def should_continue_node(state: ParserState):
     if not state["urls_to_visit"]:
