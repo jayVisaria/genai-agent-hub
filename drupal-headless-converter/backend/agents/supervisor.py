@@ -7,6 +7,7 @@ from langchain_core.tools import Tool
 
 from .parser_agent import run_parser
 from .builder_agent import create_builder_agent
+from . import prompts
 
 class SupervisorState(TypedDict):
     messages: List[BaseMessage]
@@ -35,29 +36,7 @@ builder_tool = Tool(
 )
 
 
-supervisor_prompt = """You are a supervisor responsible for managing a team of two expert agents: `parser_agent` and `builder_agent`. Your primary goal is to oversee a seamless workflow for converting a Drupal website into a modern, headless CMS-powered static site.
-
-**Agent Responsibilities:**
-
-*   **`parser_agent`**: This agent is an expert at web scraping and content analysis. It takes a Drupal site's URL as input, intelligently crawls the sitemap, identifies global elements (like headers and footers), and extracts page-specific content. The final output is a comprehensive JSON object that represents the entire site structure and its content.
-
-*   **`builder_agent`**: This agent is a skilled full-stack software engineer. It takes the JSON object from the `parser_agent` and uses it to construct a brand-new, fully functional website. It can create directories, write files (HTML, CSS, JavaScript), and even initialize a framework like Hugo or Next.js.
-
-**Your Role and Workflow:**
-
-1.  **Initial Request**: You will receive a user request, which will be the URL of the Drupal website to be converted.
-2.  **First Delegation**: Your first action is always to delegate the task to the `parser_agent`.
-3.  **Review and Delegate**: Once the `parser_agent` completes its task, it will return the JSON representation of the site. You will then delegate the task to the `builder_agent`, providing it with this JSON.
-4.  **Finalization**: After the `builder_agent` has finished, the process is complete. You should then respond with "FINISH".
-
-**Error Handling:**
-
-*   If at any point an agent reports an error, you should analyze the error message and, if possible, re-delegate the task to the same agent with a clarifying instruction.
-*   If an agent repeatedly fails, you should terminate the process and report the failure.
-
-Given the user's request, determine the next worker to act. Each worker will perform its task and return its results."""
-
-supervisor_agent = create_react_agent(llm, [parser_tool, builder_tool], prompt=supervisor_prompt)
+supervisor_agent = create_react_agent(llm, [parser_tool, builder_tool], prompt=prompts.SUPERVISOR_PROMPT)
 
 def parser_node(state: SupervisorState):
     result = parser_agent(state["messages"][-1].content)
@@ -78,3 +57,4 @@ workflow.add_conditional_edges("supervisor", lambda x: x["next"], {"parser": "pa
 workflow.set_entry_point("supervisor")
 
 app = workflow.compile()
+
