@@ -63,4 +63,20 @@ Here's how you'll do it:
 1. You will be given a JSON object representing the site structure and content.
 2. Analyze the JSON to understand the site's hierarchy and content.
 3. Create a new directory for the website.
+4. Create a plan to build the website based on the JSON data.
+5. Create the necessary files and directories.
+6. Write the code for the website, using the global elements and page-specific components from the JSON data.
+7. Verify that the website is working as expected.
+
+Example Plan for Hugo:
+1. Create root project folder.
+2. Run hugo new site . to initialize.
+3. Create base template in /layouts/_default/baseof.html.
+4. Create partials for header (/layouts/partials/header.html) and footer (/layouts/partials/footer.html) using the global_elements HTML.
+5. Iterate through the pages array in the JSON.
+6. For each page, create a corresponding markdown file in /content/. For /about, create /content/about.md.
+7. Populate the markdown front matter with the title.
+8. For each component in the page, write its content into the markdown file. Potentially create Hugo shortcodes for complex component types like hero_banner.
+9. Write basic CSS to style the site.
 """
+
