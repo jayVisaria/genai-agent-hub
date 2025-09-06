@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom/client";
-import { marked } from "marked";
+import Header from "./components/Header";
+import URLInput from "./components/URLInput";
+import LogOutput from "./components/LogOutput";
+import Footer from "./components/Footer";
 
 function App() {
   const [url, setUrl] = useState("");
