@@ -3,7 +3,7 @@
 from google.adk.agents import Agent
 from google.adk.tools.agent_tool import AgentTool
 
-from . import prompt
+from .prompts import coordinator_prompt
 from .sub_agents.analysis_agent import analysis_orchestrator
 from .sub_agents.prediction_agent import stock_prediction_agent
 
@@ -17,7 +17,7 @@ stock_analysis_coordinator = Agent(
         "comprehensive multi-factor analysis through specialized agents to "
         "deliver professional investment reports matching top-tier financial institutions."
     ),
-    instruction=prompt.STOCK_ANALYSIS_COORDINATOR_PROMPT,
+    instruction=coordinator_prompt.STOCK_ANALYSIS_COORDINATOR_PROMPT,
     tools=[
         AgentTool(agent=analysis_orchestrator),
         AgentTool(agent=stock_prediction_agent),
