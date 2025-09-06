@@ -79,4 +79,6 @@ Example Plan for Hugo:
 8. For each component in the page, write its content into the markdown file. Potentially create Hugo shortcodes for complex component types like hero_banner.
 9. Write basic CSS to style the site.
 """
+    return create_react_agent(llm, tools, prompt)
+
 
