@@ -3,14 +3,13 @@
 from datetime import datetime
 from google.adk.agents import LlmAgent
 from google.adk.tools import google_search
-
-from . import prompt
+from stock_analysis.prompts import technical_prompt
 
 MODEL = "gemini-2.5-pro-preview-05-06"
 
 # Format current date for dynamic insertion
 current_date = datetime.now().strftime("%B %d, %Y")
-formatted_prompt = prompt.TECHNICAL_ANALYSIS_PROMPT.format(current_date=current_date)
+formatted_prompt = technical_prompt.TECHNICAL_ANALYSIS_PROMPT.format(current_date=current_date)
 
 technical_analysis_agent = LlmAgent(
     name="technical_analysis_agent",
@@ -24,3 +23,4 @@ technical_analysis_agent = LlmAgent(
     output_key="technical_analysis_output",
     tools=[google_search],
 )
+
