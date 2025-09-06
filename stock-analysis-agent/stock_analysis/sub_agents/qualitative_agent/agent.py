@@ -3,14 +3,13 @@
 from datetime import datetime
 from google.adk.agents import LlmAgent
 from google.adk.tools import google_search
-
-from . import prompt
+from stock_analysis.prompts import qualitative_prompt
 
 MODEL = "gemini-2.5-pro-preview-05-06"
 
 # Format current date for dynamic insertion
 current_date = datetime.now().strftime("%B %d, %Y")
-formatted_prompt = prompt.QUALITATIVE_ANALYSIS_PROMPT.format(current_date=current_date)
+formatted_prompt = qualitative_prompt.QUALITATIVE_ANALYSIS_PROMPT.format(current_date=current_date)
 
 qualitative_analysis_agent = LlmAgent(
     name="qualitative_analysis_agent",
