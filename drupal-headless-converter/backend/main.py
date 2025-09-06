@@ -1,7 +1,8 @@
 from fastapi import FastAPI
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from pydantic import BaseModel
 import json
+import shutil
 
 from agents.supervisor import app
 
@@ -20,3 +21,9 @@ async def convert(request: ConvertRequest):
                     yield f"data: {json.dumps({'content': content})}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+@fastapi_app.get("/download")
+async def download():
+    shutil.make_archive("website", "zip", "generated_code")
+    return FileResponse("website.zip", media_type="application/zip", filename="website.zip")
+

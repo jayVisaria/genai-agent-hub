@@ -1,0 +1,8 @@
+fastapi
+langgraph
+requests
+beautifulsoup4
+lxml
+langchain-anthropic
+uvicorn
+python-multipart

@@ -37,6 +37,16 @@ function App() {
     setIsConverting(false);
   };
 
+  const downloadCode = async () => {
+    const response = await fetch('/download');
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'website.zip';
+    a.click();
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Drupal to Headless CMS Converter</h1>
@@ -50,6 +60,9 @@ function App() {
         />
         <button className="btn btn-primary" onClick={startConversion} disabled={isConverting}>
           {isConverting ? 'Converting...' : 'Start Conversion'}
+        </button>
+        <button className="btn btn-secondary" onClick={downloadCode}>
+          Download Code
         </button>
       </div>
       <div className="mockup-code">
@@ -66,5 +79,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </React.StrictMode>
 );
+
 
 
