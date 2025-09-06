@@ -1,10 +1,7 @@
 import unittest
 import os
-import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-
 import shutil
-from backend.agents.builder_agent import read_file, write_file, list_files, make_directory
+from drupal-headless-converter.backend.agents.builder_agent import read_file, write_file, list_files, make_directory
 
 class TestBuilderTools(unittest.TestCase):
 
@@ -33,6 +30,7 @@ class TestBuilderTools(unittest.TestCase):
         dir_path = os.path.join(self.test_dir, "new_dir")
         make_directory.invoke({"path": dir_path})
         self.assertTrue(os.path.isdir(dir_path))
+
 
 
 
