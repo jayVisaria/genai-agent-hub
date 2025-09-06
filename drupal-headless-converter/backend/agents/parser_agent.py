@@ -38,10 +38,6 @@ def crawl_node(state: ParserState):
     state["visited_urls"].append(url)
     content = scrape_url.invoke({"url": url})
     state["scraped_data"].append({"url": url, "content": content})
-    links = find_links.invoke({"url": url, "html_content": content})
-    for link in links:
-        if link not in state["visited_urls"] and link not in state["urls_to_visit"]:
-            state["urls_to_visit"].append(link)
 
 
 def should_continue_node(state: ParserState):
@@ -67,7 +63,8 @@ def create_parser_graph():
 
 def run_parser(url: str):
     graph = create_parser_graph()
-    initial_state = {"initial_url": url, "urls_to_visit": [url], "visited_urls": [], "scraped_data": [], "current_url": ""}
+    sitemap_urls = find_sitemap.invoke({"url": url})
+    initial_state = {"initial_url": url, "urls_to_visit": sitemap_urls, "visited_urls": [], "scraped_data": [], "current_url": ""}
     final_state = graph.invoke(initial_state)
     return json.dumps(final_state["scraped_data"], indent=2)
 
