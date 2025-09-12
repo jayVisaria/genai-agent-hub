@@ -1,7 +1,7 @@
 """Study and Learn Coordinator: Main agent orchestrating personalized learning experiences"""
 
 from google.adk.agents import Agent
-from google.adk.tools import google_search
+from google.adk.tools import google_search, load_memory
 
 from . import prompt
 
@@ -13,7 +13,7 @@ study_coordinator = Agent(
     model=MODEL,
     description=("A specialized study coordinator that facilitates personalized and interactive learning experiences."),
     instruction=prompt.STUDY_COORDINATOR_PROMPT,
-    tools=[google_search],
+    tools=[google_search, load_memory],
 )
 
 root_agent = study_coordinator
