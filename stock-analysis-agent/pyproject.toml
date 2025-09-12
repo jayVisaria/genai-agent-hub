@@ -3,7 +3,7 @@ name = "stock-analysis-agent"
 version = "0.1.0"
 description = "AI-driven multi-agent system for comprehensive stock analysis"
 authors = [
-    {name = "JayVisaria9",email = "jay.visaria@pfizer.com"}
+    {name = "jayVisaria",email = "jay.visaria.54@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.12"
