@@ -1,0 +1,402 @@
+{
+  "name": "Slack_AiSupport_Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09EN0N76R3",
+          "mode": "list",
+          "cachedResultName": "social"
+        },
+        "text": "={{ $json.output }}",
+        "otherOptions": {
+          "mrkdwn": true
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2768,
+        1792
+      ],
+      "id": "8676fd94-3ba5-462b-97af-c0f62b8593d5",
+      "name": "Send Response to Slack1",
+      "webhookId": "300d20c0-92b5-4617-b1d8-5f01bce24635",
+      "credentials": {
+        "slackApi": {
+          "id": "CcZqvZRZoS3RTWZk",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create a support ticket in Zendesk. Use this ONLY after user confirms ticket creation AND after providing troubleshooting steps that didn't resolve the issue.",
+        "description": "={{ $fromAI('description', 'Complete description including troubleshooting steps already attempted') }}",
+        "additionalFields": {
+          "status": "new",
+          "subject": "={{ $fromAI('subject', 'Clear subject line (max 60 chars)') }}",
+          "tags": "={{ $fromAI('tags', 'Tags: technical,billing,account,bug,feature,question,escalated') }}",
+          "type": "incident"
+        }
+      },
+      "type": "n8n-nodes-base.zendeskTool",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        2016
+      ],
+      "id": "e6a1e8ea-8d6d-4fd4-80c7-d32cb558821c",
+      "name": "Create Zendesk Ticket1",
+      "credentials": {
+        "zendeskApi": {
+          "id": "PeMDPN2hvXYAjDM2",
+          "name": "Zendesk account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get recent tickets from Zendesk when user asks about ticket status or lists tickets.",
+        "operation": "getAll",
+        "limit": 10,
+        "options": {
+          "sortBy": "created_at",
+          "sortOrder": "desc"
+        }
+      },
+      "type": "n8n-nodes-base.zendeskTool",
+      "typeVersion": 1,
+      "position": [
+        2208,
+        2016
+      ],
+      "id": "bf4d9261-1f0c-45d3-b3e0-3923ecf81999",
+      "name": "Get Zendesk Tickets1",
+      "credentials": {
+        "zendeskApi": {
+          "id": "PeMDPN2hvXYAjDM2",
+          "name": "Zendesk account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get specific ticket details by ID when user asks about a particular ticket number (e.g., 'What's the status of ticket #12345?').",
+        "operation": "get",
+        "id": "={{ $fromAI('ticket_id', 'The ticket ID number from user query') }}"
+      },
+      "type": "n8n-nodes-base.zendeskTool",
+      "typeVersion": 1,
+      "position": [
+        2336,
+        2016
+      ],
+      "id": "4f7d0dd9-90d2-4188-9c96-ce35751638e6",
+      "name": "Get Specific Ticket1",
+      "credentials": {
+        "zendeskApi": {
+          "id": "PeMDPN2hvXYAjDM2",
+          "name": "Zendesk account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxOutputTokens": 1024,
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        2016
+      ],
+      "id": "93f8645e-2fd2-4ec5-a5ef-6aa8683491c1",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "pkt2ixKWSBwi2g3V",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        2016
+      ],
+      "id": "47e1da70-8dab-4791-8ff0-faaec64d9cba",
+      "name": "Conversation Memory1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "session_id",
+              "name": "session_id",
+              "value": "={{ $json.user }}_{{ $json.channel }}{{ $json.thread_ts ? '_' + $json.thread_ts : '' }}",
+              "type": "string"
+            },
+            {
+              "id": "message_text",
+              "name": "message_text",
+              "value": "={{ $json.text.replace(/<@[A-Z0-9]+>/g, '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "user_id",
+              "name": "user_id",
+              "value": "={{ $json.user }}",
+              "type": "string"
+            },
+            {
+              "id": "channel_id",
+              "name": "channel_id",
+              "value": "={{ $json.channel }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1664,
+        1792
+      ],
+      "id": "821d9b5b-c2c1-4f72-81f4-a95301e75584",
+      "name": "Extract Session & Message1"
+    },
+    {
+      "parameters": {
+        "trigger": [
+          "app_mention"
+        ],
+        "channelId": {
+          "__rl": true,
+          "value": "C09EN0N76R3",
+          "mode": "list",
+          "cachedResultName": "social"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        1792
+      ],
+      "id": "5d350011-4554-499c-bd8c-b915359d3f51",
+      "name": "Slack Trigger1",
+      "webhookId": "a37ac330-aa8e-4fc9-8aae-9337dc8ca0a2",
+      "credentials": {
+        "slackApi": {
+          "id": "CcZqvZRZoS3RTWZk",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Search the company knowledge base for answers to user questions, including past ticket solutions, troubleshooting guides, and common issues. Use this FIRST for any user query before providing troubleshooting steps.",
+        "milvusCollection": {
+          "__rl": true,
+          "value": "ticket_collection1",
+          "mode": "list",
+          "cachedResultName": "ticket_collection1"
+        },
+        "topK": 3
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreMilvus",
+      "typeVersion": 1.3,
+      "position": [
+        2464,
+        2016
+      ],
+      "id": "c5b11494-9a9c-439a-9f8c-8dd7b076ceb0",
+      "name": "Milvus Vector Store1",
+      "credentials": {
+        "milvusApi": {
+          "id": "sucfixfS5DQGfmN5",
+          "name": "Milvus account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2464,
+        2224
+      ],
+      "id": "cee7746b-18a3-42be-ab31-fe350e215cc4",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "pkt2ixKWSBwi2g3V",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message_text }}",
+        "options": {
+          "systemMessage": "You are an intelligent AI support agent for our company's Slack-Zendesk integration system.\n\n## SEARCH WORKFLOW: KB FIRST, THEN TROUBLESHOOT\n**ALWAYS follow this sequence:**\n1. **KNOWLEDGE BASE SEARCH**: For ANY user query, first search the knowledge base using the Milvus tool\n2. **KB RESULT EVALUATION**: \n   - If KB contains relevant answer → Provide that answer with confidence\n   - If KB results are partial → Combine KB info with troubleshooting\n   - If KB has no relevant results → Proceed with normal troubleshooting flow\n\n## KNOWLEDGE BASE USAGE\n- **Search for**: Similar issues, solutions, procedures, common problems, past tickets\n- **Always search first** before providing troubleshooting steps\n- **Cite KB source** when using information from knowledge base\n- **Format**: \"Based on our knowledge base: [answer]\" or \"I found this in our previous solutions: [answer]\"\n\n## FALLBACK TO TROUBLESHOOTING\nIf knowledge base doesn't have the answer, then follow the troubleshooting workflow:\n\n### CORE PHILOSOPHY: RESOLVE FIRST, ESCALATE SECOND\nYour goal is to **resolve issues through troubleshooting** before creating tickets. Only escalate when:\n1. User has tried suggested solutions and they didn't work\n2. Issue requires backend/admin access\n3. User explicitly requests ticket creation after troubleshooting\n\n[Continue your detailed troubleshooting states, steps, ticket queries, common issues/solutions, priority assessment, etc.]\n\nAnalyze the user's message using conversation memory and respond appropriately!"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2080,
+        1792
+      ],
+      "id": "c9ac8032-aa89-4b59-8f73-5363a6fac131",
+      "name": "AI Support Agent"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Create Zendesk Ticket1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Support Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Zendesk Tickets1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Support Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Specific Ticket1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Support Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Support Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Support Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Session & Message1": {
+      "main": [
+        [
+          {
+            "node": "AI Support Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Extract Session & Message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Milvus Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Support Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Milvus Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Support Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Response to Slack1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fe4d83b7-0746-4f57-9575-59a5c4868246",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6beb22b100e899c6154ccfc3ceb40548ba251b8ce101a6668cc4ff87cf9bc592"
+  },
+  "id": "mGexTZbxgjb4UUFx",
+  "tags": []
+}
