@@ -1,3 +1,7 @@
+# Workflow Overview
+
+![Workflow Diagram](Assets/img.png)
+
 # Enterprise Search Assistant – n8n Workflow
 
 This n8n workflow provides an AI-powered Enterprise Search Assistant specialized in Jira ticket analysis and enterprise knowledge retrieval. It is designed to help users find accurate information from Jira and deliver actionable insights, but can be easily extended to include other enterprise data sources such as SharePoint, Confluence, or custom databases.
