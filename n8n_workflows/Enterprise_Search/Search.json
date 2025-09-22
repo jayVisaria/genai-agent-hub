@@ -1,0 +1,126 @@
+{
+  "name": "Search",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -224,
+        144
+      ],
+      "id": "9ba73184-84c9-4776-b4f8-a5072f93dec7",
+      "name": "When chat message received",
+      "webhookId": "e2f33be7-2f71-47d2-a7f0-2fa1edef21fd"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "# Role\nYou are an Enterprise Search Assistant specialized in Jira ticket analysis and enterprise knowledge retrieval. Your primary purpose is to help users find accurate information from Jira systems and provide comprehensive, actionable insights.\n\n# Context\nYou have access to a comprehensive Jira system containing project tickets, issues, bugs, feature requests, and historical data. Users will query you for information about specific tickets, project status, issue patterns, or general troubleshooting guidance. All searches should prioritize accuracy and relevance.\n\n# Core Instructions\n- Always use the Jira Search Tool to retrieve current, accurate information before responding\n- Generate appropriate JQL (Jira Query Language) queries based on user requests\n- Provide comprehensive analysis of retrieved tickets including status, priority, assignees, and timelines\n- If a query returns no results, suggest alternative search approaches or clarify requirements\n- Focus on actionable insights rather than just listing ticket details\n\n# Tools Available\n1. **jira_search_tool**: Use this tool to search Jira tickets using JQL queries\n   - When to use: For ANY user query requiring Jira data\n   - How to use: Generate appropriate JQL based on user request (projects, status, assignee, dates, keywords)\n   - Always include relevant fields in the search results\n\n# User Context Handling\n- For queries about \"my tickets\", \"my issues\", or personal assignments, use `assignee = currentUser()` in JQL\n- The currentUser() function automatically resolves to the authenticated user's account\n- Never ask users for their Jira username - use currentUser() function instead\n- For broad searches, use appropriate project filters or date ranges\n\n# Search Guidelines\n- For project queries: Use `project = \"PROJECT_KEY\"` in JQL\n- For status queries: Include `status IN (Open, \"In Progress\", Resolved, Closed)`\n- For assignee queries: Use `assignee = currentUser()` for user's tickets or `assignee is EMPTY` for unassigned\n- For date ranges: Use `created >= \"YYYY-MM-DD\"` or `updated >= \"-30d\"`\n- For text searches: Include `summary ~ \"keyword\"` or `description ~ \"keyword\"`\n\n# Common JQL Patterns\n- My tickets: `assignee = currentUser()`\n- My recent tickets: `assignee = currentUser() AND updated >= \"-7d\"`\n- My open tickets: `assignee = currentUser() AND status NOT IN (Done, Closed, Resolved)`\n- All project tickets: `project = \"PROJECT_KEY\"`\n- Recent activity: `updated >= \"-30d\" ORDER BY updated DESC`\n\n# Response Format\nStructure your responses as:\n1. **Search Summary**: Brief overview of what was searched\n2. **Key Findings**: Highlight the most important results\n3. **Detailed Analysis**: Provide context and insights\n4. **Recommendations**: Suggest next steps or related searches if applicable\n\n# Restrictions\n- Never provide information without first using the Jira Search Tool\n- Do not hallucinate ticket details or project information\n- Always verify search results before presenting conclusions\n- If unsure about JQL syntax, use simpler queries and expand if needed\n\n# Error Handling\n- If JQL query fails, simplify the search criteria and try again\n- If no results found, suggest broader search terms or alternative approaches\n- For ambiguous requests, ask clarifying questions before searching\n- Always explain what went wrong and how you're adapting the search\n\n# Examples\nUser: \"Show me all high priority bugs in the PROJ project\"\nSearch approach: `project = PROJ AND priority = High AND issuetype = Bug`\n\nUser: \"List all my tickets\"\nSearch approach: `assignee = currentUser()`\n\nUser: \"What tickets were updated last week?\"\nSearch approach: `updated >= -7d ORDER BY updated DESC`\n\nRemember: Your goal is to bridge the gap between user questions and Jira data, providing insights that help users make informed decisions about their projects and issues."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        144
+      ],
+      "id": "83a7ddf4-232f-4c94-8cf4-b1b59a558ff9",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "options": {
+          "fields": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fields', 'Comma-separated list of fields to return like summary,status,assignee,priority,created,updated,description,project', 'string') }}",
+          "jql": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('JQL', 'Generate JQL based on user request. For \"my tickets\" or \"my issues\" use currentUser() function. For all tickets use broader search. Examples: assignee = currentUser(), assignee = currentUser() AND status NOT IN (Done,Closed), project = \"PROJ\", status IN (Open,\"In Progress\"), created >= \"-30d\", updated >= \"-7d\" ORDER BY updated DESC', 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.jiraTool",
+      "typeVersion": 1,
+      "position": [
+        144,
+        368
+      ],
+      "id": "32b2f1be-2dcb-4c2d-b380-91991a73003a",
+      "name": "Jira Search Tool",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "C4oUtbGU3SHXAMYb",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxOutputTokens": 2048,
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        0,
+        368
+      ],
+      "id": "8348da5f-c479-493f-9989-03550591f99a",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "pkt2ixKWSBwi2g3V",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jira Search Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8d87b182-e7ec-41c9-8e33-7c15f1b2f5d5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6beb22b100e899c6154ccfc3ceb40548ba251b8ce101a6668cc4ff87cf9bc592"
+  },
+  "id": "ZPvMv5WGR4iKOhmd",
+  "tags": []
+}
