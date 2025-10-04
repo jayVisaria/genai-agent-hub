@@ -7,6 +7,14 @@ from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers.openai_functions import JsonOutputFunctionsParser
+from .prompts import (
+    SUPERVISOR_PROMPT,
+    IMAGE_ANALYZER_PROMPT,
+    SYMPTOM_TRIAGER_PROMPT,
+    KNOWLEDGE_RETRIEVER_PROMPT,
+    GENERIC_AGENT_PROMPT,
+    FINISH_PROMPT,
+)
 
 
 @tool
@@ -74,22 +82,15 @@ class Supervisor:
 
     def create_supervisor_chain(self):
         members = list(self.agents.keys())
-        system_prompt = ("You are a supervisor tasked with managing a conversation between the"
-                         " following workers:  {members}. Given the following user request,"
-                         " respond with the worker to act next. Each worker will perform a"
-                         " task and respond with their results and status. When the user is satisfied,"
-                         " respond with FINISH.")
-        options = ["FINISH"] + members
+        options = [FINISH_PROMPT] + members
         function_def = {
             "name": "route",
             "description": "Select the next role.",
             "parameters": {"title": "routeSchema", "type": "object", "properties": {
                 "next": {"title": "Next", "anyOf": [{"enum": options}]}}, "required": ["next"]},
         }
-        prompt = ChatPromptTemplate.from_messages([("system", system_prompt),
+        prompt = ChatPromptTemplate.from_messages([("system", SUPERVISOR_PROMPT),
                                                    MessagesPlaceholder(variable_name="messages"),
-                                                   ("system", "Given the conversation above, who should act next?"
-                                                              " Or should we FINISH? Select one of: {options}"),
                                                    ]).partial(options=str(options), members=", ".join(members))
         return (prompt | self.model.bind_functions(functions=[function_def], function_call="route") | JsonOutputFunctionsParser())
 
@@ -99,9 +100,9 @@ class Supervisor:
 
 
 llm = ChatGoogleGenerativeAI(model="gemini-pro")
-image_agent = Agent(llm, [analyze_image], "You are a medical image analysis expert.")
-symptom_agent = Agent(llm, [triage_symptoms], "You are a symptom triage expert.")
-knowledge_agent = Agent(llm, [medical_knowledge_retrieval], "You are a medical knowledge retrieval expert.")
+image_agent = Agent(llm, [analyze_image], IMAGE_ANALYZER_PROMPT)
+symptom_agent = Agent(llm, [triage_symptoms], SYMPTOM_TRIAGER_PROMPT)
+knowledge_agent = Agent(llm, [medical_knowledge_retrieval], KNOWLEDGE_RETRIEVER_PROMPT)
 agents = {
     "image_analyzer": image_agent,
     "symptom_triager": symptom_agent,
@@ -112,3 +113,4 @@ workflow = StateGraph(AgentState)
 workflow.add_node("supervisor", supervisor.call_supervisor)
 for member, agent in agents.items():
     workflow.add_node(member, agent.graph.invoke)
+
