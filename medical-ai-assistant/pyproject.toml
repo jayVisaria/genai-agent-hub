@@ -1,0 +1,23 @@
+[project]
+name = "medical-ai-assistant"
+version = "0.1.0"
+description = "AI-driven multi-agent system for comprehensive medical analysis"
+authors = [
+    {name = "Bot", email = "bot@langchain.dev"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "python-multipart",
+    "langgraph",
+    "google-adk",
+    "google-cloud-aiplatform",
+    "google-genai",
+    "pydicom",
+    "pytesseract",
+    "pdf2image",
+    "pillow",
+]
+
