@@ -1,84 +1,160 @@
-import os
-from typing import TypedDict, Annotated, Sequence
+from typing import Annotated, Any, Dict, List, Optional, Sequence, TypedDict
 import operator
-from langchain_core.messages import BaseMessage, HumanMessage
-from langgraph.graph import StateGraph, END
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langgraph.prebuilt import ToolInvocation
-import json
-from langchain_core.tools import tool
 
-# Initialize the Gemini model
-llm = ChatGoogleGenerativeAI(model="gemini-pro")
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.tools import tool
+from langgraph.graph import StateGraph, END
+
 
 @tool
 def analyze_image(image_path: str):
     """Analyzes a medical image and returns a report."""
-    # Placeholder for image analysis logic
     return f"Image analysis report for {image_path}"
+
 
 @tool
 def triage_symptoms(symptoms: str):
     """Triages patient symptoms and provides a preliminary assessment."""
-    # Placeholder for symptom triage logic
     return f"Symptom triage report for: {symptoms}"
+
 
 @tool
 def medical_knowledge_retrieval(query: str):
     """Retrieves medical knowledge based on a query."""
-    # Placeholder for medical knowledge retrieval logic
     return f"Medical knowledge retrieval for: {query}"
 
-tools = [analyze_image, triage_symptoms, medical_knowledge_retrieval]
 
 class AgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], operator.add]
+    next: str
+
 
 class Agent:
-    def __init__(self, llm, tools, system=""):
+    def __init__(self, model, tools, system=""):
         self.system = system
         graph = StateGraph(AgentState)
-        graph.add_node("llm", self.call_llm)
-        graph.add_node("tools", self.call_tool)
-        graph.add_conditional_edges("llm", self.exists_action, {True: "tools", False: END})
-        graph.add_edge("tools", "llm")
+        graph.add_node("llm", self.call_openai)
+        graph.add_node("action", self.take_action)
+        graph.add_conditional_edges(
+            "llm",
+            self.exists_action,
+            {True: "action", False: END}
+        )
+        graph.add_edge("action", "llm")
         graph.set_entry_point("llm")
         self.graph = graph.compile()
+        self.tools = {t.name: t for t in tools}
+        self.model = model
 
     def exists_action(self, state: AgentState):
         result = state['messages'][-1]
-        return len(result.additional_kwargs) > 0
+        return hasattr(result, 'tool_calls') and len(result.tool_calls) > 0
 
-    def call_llm(self, state: AgentState):
+    def call_openai(self, state: AgentState):
         messages = state['messages']
         if self.system:
-            messages = [HumanMessage(content=self.system)] + messages
-        message = self.llm.invoke(messages)
+            messages = [HumanMessage(content=self.system)] + list(messages)
+        message = self.model.invoke(messages)
         return {'messages': [message]}
 
-    def call_tool(self, state: AgentState):
-        action = state['messages'][-1]
-        result = ""
-        for tool_call in action.additional_kwargs.get("tool_calls", []):
-            observation = self.tools[tool_call["function"]["name"]].invoke(json.loads(tool_call["function"]["arguments"]))
-            result += f"
-        return {'messages': [HumanMessage(content=result, name="action_result")]}
+    def take_action(self, state: AgentState):
+        tool_calls = state['messages'][-1].tool_calls
+        results = []
+        for t in tool_calls:
+            print(f"Calling: {t}")
+            result = self.tools[t['name']].invoke(t['args'])
+            results.append(HumanMessage(content=str(result), name=t['name']))
+        return {'messages': results}
+
 
 class Supervisor:
-    def __init__(self, llm, agents):
-        self.llm = llm
+    def __init__(self, model, agents):
+        self.model = model
         self.agents = agents
         self.graph = self.create_graph()
 
     def create_graph(self):
-        # This will be a more complex graph that routes to the different agents
-        # For now, it's a placeholder
-        graph = StateGraph(AgentState)
-        graph.add_node("supervisor", self.call_supervisor)
-        # Add edges to the different agents based on the supervisor's decision
-        # This is a simplified version
-        graph.add_edge("supervisor", END)
-        graph.set_entry_point("supervisor")
+        members = list(self.agents.keys())
+        system_prompt = (
+            "You are a supervisor tasked with managing a conversation between the"
+            " following workers:  {members}. Given the following user request,"
+            " respond with the worker to act next. Each worker will perform a"
+            " task and respond with their results and status. When the user is satisfied,"
+            " respond with FINISH."
+        )
+        options = ["FINISH"] + members
+        function_def = {
+            "name": "route",
+            "description": "Select the next role.",
+            "parameters": {
+                "title": "routeSchema",
+                "type": "object",
+                "properties": {
+                    "next": {
+                        "title": "Next",
+                        "anyOf": [
+                            {"enum": options},
+                        ],
+                    }
+                },
+                "required": ["next"],
+            },
+        }
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_prompt),
+                MessagesPlaceholder(variable_name="messages"),
+                (
+                    "system",
+                    "Given the conversation above, who should act next?"
+                    " Or should we FINISH? Select one of: {options}",
+                ),
+            ]
+        ).partial(options=str(options), members=", ".join(members))
+        supervisor_chain = (
+            prompt
+            | self.model.bind_functions(functions=[function_def], function_call="route")
+            | JsonOutputFunctionsParser()
+        )
+        return supervisor_chain
+
+    def call_supervisor(self, state: AgentState):
+        result = self.graph.invoke(state)
+        return {"next": result["next"]}
+
+
+llm = ChatGoogleGenerativeAI(model="gemini-pro")
+
+image_agent = Agent(llm, [analyze_image], "You are a medical image analysis expert.")
+symptom_agent = Agent(llm, [triage_symptoms], "You are a symptom triage expert.")
+knowledge_agent = Agent(llm, [medical_knowledge_retrieval], "You are a medical knowledge retrieval expert.")
+
+agents = {
+    "image_analyzer": image_agent,
+    "symptom_triager": symptom_agent,
+    "knowledge_retriever": knowledge_agent,
+}
+
+supervisor = Supervisor(llm, agents)
+
+workflow = StateGraph(AgentState)
+workflow.add_node("supervisor", supervisor.call_supervisor)
+for member, agent in agents.items():
+    workflow.add_node(member, agent.graph.invoke)
+
+workflow.add_conditional_edges(
+    "supervisor",
+    lambda x: x["next"],
+    {member: member for member in agents.keys()}
+)
+
+for member in agents.keys():
+    workflow.add_edge(member, "supervisor")
+
+workflow.set_entry_point("supervisor")
+
+app = workflow.compile()
         return graph.compile()
 
     def call_supervisor(self, state: AgentState):
@@ -103,4 +179,5 @@ supervisor = Supervisor(llm, agents)
 # supervisor.graph.invoke({"messages": [HumanMessage(content="Analyze this X-ray and tell me what you see.")]})
 
 app = supervisor.graph
+
 
